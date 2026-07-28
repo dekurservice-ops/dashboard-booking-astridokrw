@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrido Karawang Aftersales Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        canvas { max-height: 300px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- OVERLAY SIDEBAR -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR / NAVIGATION -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl z-50 transform -translate-x-full sidebar-transition">
+        <div class="p-6 border-b">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i data-lucide="car"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg leading-tight">Astrido Karawang</h2>
+                    <p class="text-xs text-gray-400">dekurservice@gmail.com</p>
+                </div>
+            </div>
+        </div>
+        <nav class="p-4 space-y-2">
+            <a href="#" class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-700 font-semibold">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Booking
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 rounded-lg text-gray-400 cursor-not-allowed group">
+                <i data-lucide="package" class="w-5 h-5"></i>
+                Special Order Part
+                <span class="text-[10px] bg-gray-100 px-1 rounded uppercase ml-auto">Soon</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 bg-white border-b z-30">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold text-gray-900">Astrido Karawang Aftersales</h1>
+                    <p class="text-xs text-gray-500 hidden md:block">Aftersales Monitoring Analytics</p>
+                </div>
+            </div>
+            <div id="loadingStatus" class="flex items-center gap-2 text-sm text-blue-600 font-medium">
+                <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                Syncing Data...
+            </div>
+        </div>
+    </header>
+
+    <main class="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+        
+        <!-- FILTER BAR -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end">
+            <div class="w-full md:w-auto flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Filter Tanggal Service</label>
+                <div class="flex gap-2">
+                    <input type="date" id="startDate" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="date" id="endDate" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+            <div class="w-full md:w-auto flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Filter Nama MRA</label>
+                <select id="mraFilter" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="All">Semua MRA</option>
+                </select>
+            </div>
+            <button onclick="applyFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors w-full md:w-auto">
+                Apply Filter
+            </button>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- Card 1 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Total Booking</p>
+                <h3 id="kpiTotal" class="text-2xl font-bold mt-1">0</h3>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Total Datang</p>
+                <h3 id="kpiDatang" class="text-2xl font-bold mt-1 text-green-600">0</h3>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-red-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Tidak Datang</p>
+                <h3 id="kpiTidakDatang" class="text-2xl font-bold mt-1 text-red-600">0</h3>
+            </div>
+            <!-- Card 4 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-amber-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Belum Datang</p>
+                <h3 id="kpiBelum" class="text-2xl font-bold mt-1 text-amber-600">0</h3>
+            </div>
+            <!-- Card 5 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-teal-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Show Rate (%)</p>
+                <h3 id="kpiRate" class="text-2xl font-bold mt-1 text-teal-600">0%</h3>
+            </div>
+            <!-- Card 6 -->
+            <div class="bg-white p-4 rounded-xl border-l-4 border-purple-500 shadow-sm">
+                <p class="text-xs font-medium text-gray-500 uppercase">Active MRA</p>
+                <h3 id="kpiMra" class="text-2xl font-bold mt-1 text-purple-600">0</h3>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Line Chart Trend -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <h4 class="font-bold text-gray-700 mb-4">Trend Kedatangan Per Hari</h4>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <!-- Horizontal Bar Chart -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <h4 class="font-bold text-gray-700 mb-4">Top Sumber Data Booking</h4>
+                <canvas id="sourceChart"></canvas>
+            </div>
+            <!-- Donut Chart -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <h4 class="font-bold text-gray-700 mb-4">Distribusi Order Pekerjaan</h4>
+                <div class="flex justify-center">
+                    <canvas id="orderChart" style="max-width: 300px;"></canvas>
+                </div>
+            </div>
+            <!-- Leaderboard Table -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <h4 class="font-bold text-gray-700 mb-4">Leaderboard Performance MRA</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold">
+                            <tr>
+                                <th class="px-4 py-3">Rank</th>
+                                <th class="px-4 py-3">Nama MRA</th>
+                                <th class="px-4 py-3">Total</th>
+                                <th class="px-4 py-3">Datang</th>
+                                <th class="px-4 py-3 text-center">Rate (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody" class="divide-y divide-gray-100">
+                            <!-- Data injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgLQ8hj-ab5ZOJu31Z1d2gyWxeYNxl4BXHjXYZSq9eaAAnURBkcv61joIaU0Qpj-7G-eQ-yV2uGAIz/pub?gid=0&single=true&output=csv';
+        
+        let rawData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+            
+            if (isHidden) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Fetch Data
+        async function fetchData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    rawData = results.data;
+                    initFilters();
+                    processData();
+                    document.getElementById('loadingStatus').classList.add('hidden');
+                },
+                error: function(err) {
+                    console.error("Gagal mengambil data:", err);
+                    alert("Gagal memuat data dari Google Sheets.");
+                }
+            });
+        }
+
+        function initFilters() {
+            const mras = [...new Set(rawData.map(item => item['Nama MRA']))].filter(Boolean).sort();
+            const filterEl = document.getElementById('mraFilter');
+            mras.forEach(mra => {
+                const opt = document.createElement('option');
+                opt.value = mra;
+                opt.textContent = mra;
+                filterEl.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const mra = document.getElementById('mraFilter').value;
+
+            filteredData = rawData.filter(item => {
+                let matchDate = true;
+                let matchMra = true;
+
+                if (startDate && endDate) {
+                    const svcDate = new Date(item['Service Tanggal']);
+                    matchDate = svcDate >= new Date(startDate) && svcDate <= new Date(endDate);
+                }
+                if (mra !== 'All') {
+                    matchMra = item['Nama MRA'] === mra;
+                }
+                return matchDate && matchMra;
+            });
+
+            updateDashboard();
+        }
+
+        function processData() {
+            filteredData = [...rawData];
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            // 1. KPI Calculations
+            const total = filteredData.length;
+            const datang = filteredData.filter(d => d['CAI'] === 'DATANG').length;
+            const tidakDatang = filteredData.filter(d => d['CAI'] === 'TIDAK DATANG').length;
+            const belumDatang = filteredData.filter(d => !d['CAI'] || d['CAI'].trim() === '').length;
+            const showRate = total > 0 ? ((datang / total) * 100).toFixed(1) : 0;
+            const uniqueMRA = [...new Set(filteredData.map(d => d['Nama MRA']))].filter(Boolean).length;
+
+            // Update KPI DOM
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiDatang').textContent = datang;
+            document.getElementById('kpiTidakDatang').textContent = tidakDatang;
+            document.getElementById('kpiBelum').textContent = belumDatang;
+            document.getElementById('kpiRate').textContent = showRate + '%';
+            document.getElementById('kpiMra').textContent = uniqueMRA;
+
+            updateCharts(filteredData);
+            updateLeaderboard(filteredData);
+        }
+
+        function updateCharts(data) {
+            // Grouping for Trend (Line Chart)
+            const trendData = {};
+            data.forEach(d => {
+                const date = d['Service Tanggal'] || 'Unknown';
+                if (!trendData[date]) trendData[date] = { datang: 0, tidak: 0, belum: 0 };
+                if (d['CAI'] === 'DATANG') trendData[date].datang++;
+                else if (d['CAI'] === 'TIDAK DATANG') trendData[date].tidak++;
+                else trendData[date].belum++;
+            });
+            const sortedDates = Object.keys(trendData).sort((a,b) => new Date(a) - new Date(b));
+
+            renderChart('trendChart', 'line', {
+                labels: sortedDates,
+                datasets: [
+                    { label: 'Datang', data: sortedDates.map(d => trendData[d].datang), borderColor: '#22c55e', tension: 0.3 },
+                    { label: 'Tidak Datang', data: sortedDates.map(d => trendData[d].tidak), borderColor: '#ef4444', tension: 0.3 },
+                    { label: 'Belum Datang', data: sortedDates.map(d => trendData[d].belum), borderColor: '#f59e0b', tension: 0.3 }
+                ]
+            });
+
+            // Grouping for Source (Bar Chart)
+            const sourceCounts = {};
+            data.forEach(d => {
+                const src = d['Sumber Data'] || 'Lainnya';
+                sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+            });
+            const sortedSources = Object.entries(sourceCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+            renderChart('sourceChart', 'bar', {
+                labels: sortedSources.map(s => s[0]),
+                datasets: [{
+                    label: 'Jumlah Booking',
+                    data: sortedSources.map(s => s[1]),
+                    backgroundColor: '#3b82f6',
+                    indexAxis: 'y'
+                }]
+            });
+
+            // Grouping for Order Type (Donut Chart)
+            const orderCounts = {};
+            data.forEach(d => {
+                const ord = d['Order Pekerjaan'] || 'N/A';
+                orderCounts[ord] = (orderCounts[ord] || 0) + 1;
+            });
+
+            renderChart('orderChart', 'doughnut', {
+                labels: Object.keys(orderCounts),
+                datasets: [{
+                    data: Object.values(orderCounts),
+                    backgroundColor: ['#6366f1', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981']
+                }]
+            });
+        }
+
+        function renderChart(id, type, data) {
+            if (charts[id]) charts[id].destroy();
+            const ctx = document.getElementById(id).getContext('2d');
+            charts[id] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function updateLeaderboard(data) {
+            const mraStats = {};
+            data.forEach(d => {
+                const name = d['Nama MRA'];
+                if (!name) return;
+                if (!mraStats[name]) mraStats[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
+                mraStats[name].total++;
+                if (d['CAI'] === 'DATANG') mraStats[name].datang++;
+                else if (d['CAI'] === 'TIDAK DATANG') mraStats[name].tidak++;
+                else mraStats[name].belum++;
+            });
+
+            const sortedMra = Object.entries(mraStats)
+                .map(([name, stats]) => ({
+                    name,
+                    ...stats,
+                    rate: stats.total > 0 ? (stats.datang / stats.total) * 100 : 0
+                }))
+                .sort((a, b) => b.rate - a.rate);
+
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            sortedMra.forEach((mra, index) => {
+                const badgeColor = mra.rate > 60 ? 'bg-green-100 text-green-700' : (mra.rate >= 40 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700');
+                
+                const row = `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 font-semibold text-gray-400">#${index + 1}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">${mra.name}</td>
+                        <td class="px-4 py-3">${mra.total}</td>
+                        <td class="px-4 py-3 text-green-600 font-medium">${mra.datang}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-1 rounded-full text-[11px] font-bold ${badgeColor}">
+                                ${mra.rate.toFixed(1)}%
+                            </span>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Run App
+        fetchData();
+    </script>
+</body>
+</html>
