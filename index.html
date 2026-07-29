@@ -188,13 +188,21 @@
 
         <!-- CHARTS SECTION -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- TREND CHART DENGAN CONTROL HARIAN/MINGGUAN/BULANAN -->
             <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Trend Kedatangan Service</h3>
                         <p class="text-xs text-slate-400">Berdasarkan Service Tanggal</p>
                     </div>
-                    <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="line-chart" class="w-4 h-4"></i></span>
+                    <div class="flex items-center gap-2">
+                        <select id="trendGranularity" onchange="renderTrendChart()" class="bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-2.5 py-1.5 focus:outline-none cursor-pointer">
+                            <option value="daily" selected>Harian</option>
+                            <option value="weekly">Mingguan</option>
+                            <option value="monthly">Bulanan</option>
+                        </select>
+                        <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="line-chart" class="w-4 h-4"></i></span>
+                    </div>
                 </div>
                 <div class="relative flex-1 min-h-[260px]">
                     <canvas id="trendChart"></canvas>
@@ -302,7 +310,6 @@
             const refreshIcon = document.getElementById('refreshIcon');
             if(refreshIcon) refreshIcon.classList.add('animate-spin');
 
-            // Cache buster parameter agar selalu mengambil CSV paling baru tanpa ter-cache
             const dynamicUrl = `${CSV_URL}&_t=${new Date().getTime()}`;
 
             Papa.parse(dynamicUrl, {
@@ -313,7 +320,6 @@
                     if(refreshIcon) refreshIcon.classList.remove('animate-spin');
                     rawData = processRawData(results.data);
                     
-                    // Otomatisasi komponen filter berdasarkan data ter-update
                     populateMraFilterOptions();
                     initDateRangeFilter();
                     
@@ -351,12 +357,10 @@
             });
         }
 
-        // OTOMATISASI LIST MRA BERDASARKAN HASIL SCAN REAL-TIME CSV
         function populateMraFilterOptions() {
             const filterMra = document.getElementById('filterMra');
             const currentSelected = filterMra.value;
 
-            // Ekstrak secara otomatis semua nama MRA unik yang terdaftar
             const mraList = [...new Set(rawData.map(item => item.mra))]
                 .filter(m => m !== 'Unassigned' && m !== '-' && m !== '')
                 .sort();
@@ -369,18 +373,16 @@
                 filterMra.appendChild(opt);
             });
 
-            // Pertahankan pilihan user jika MRA tersebut masih ada
             if (mraList.includes(currentSelected)) {
                 filterMra.value = currentSelected;
             }
         }
 
-        // OTOMATISASI RENTANG TANGGAL BERDASARKAN MIN-MAX DATA DARI CSV
         function initDateRangeFilter() {
             const startInput = document.getElementById('startDate');
             const endInput = document.getElementById('endDate');
 
-            if (startInput.value || endInput.value) return; // Jika user sudah pilih manual, jangan overwrite
+            if (startInput.value || endInput.value) return;
 
             const validDates = rawData
                 .map(item => parseDate(item.tglService))
@@ -426,18 +428,27 @@
 
         function parseDate(dateStr) {
             if (!dateStr || dateStr === '-') return null;
-            const parsed = new Date(dateStr);
-            if (!isNaN(parsed)) return parsed;
 
             const parts = dateStr.split('-');
-            if(parts.length === 3) {
-                const day = parts[0].trim();
+            if (parts.length === 3) {
+                const day = parseInt(parts[0].trim(), 10);
                 const monthStr = parts[1].trim();
-                let year = parts[2].trim();
-                if(year.length === 2) year = '20' + year;
-                return new Date(`${monthStr} ${day}, ${year}`);
+                let year = parseInt(parts[2].trim(), 10);
+                if (year < 100) year += 2000;
+
+                const months = {
+                    jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5,
+                    jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11
+                };
+                
+                const month = months[monthStr.toLowerCase()];
+                if (month !== undefined) {
+                    return new Date(year, month, day);
+                }
             }
-            return null;
+            
+            const parsed = new Date(dateStr);
+            return isNaN(parsed) ? null : parsed;
         }
 
         function updateKPIs() {
@@ -463,21 +474,86 @@
         }
 
         function renderTrendChart() {
-            const datesMap = {};
-            filteredData.forEach(item => {
-                const dateKey = item.tglService;
-                if (!datesMap[dateKey]) {
-                    datesMap[dateKey] = { DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
+            const granularity = document.getElementById('trendGranularity')?.value || 'daily';
+            const startInput = document.getElementById('startDate').value;
+            const endInput = document.getElementById('endDate').value;
+
+            let start = startInput ? new Date(startInput) : null;
+            let end = endInput ? new Date(endInput) : null;
+
+            if (!start || !end) {
+                const validDates = filteredData
+                    .map(item => parseDate(item.tglService))
+                    .filter(d => d !== null);
+
+                if (validDates.length > 0) {
+                    if (!start) start = new Date(Math.min(...validDates));
+                    if (!end) end = new Date(Math.max(...validDates));
                 }
-                if (datesMap[dateKey][item.status] !== undefined) {
-                    datesMap[dateKey][item.status]++;
+            }
+
+            if (!start || !end) return;
+
+            function getKeyAndLabel(dateObj) {
+                const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                
+                if (granularity === 'monthly') {
+                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    const label = `${monthsShort[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                    return { key, label };
+                } 
+                else if (granularity === 'weekly') {
+                    const d = new Date(dateObj);
+                    const day = d.getDay();
+                    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                    const monday = new Date(d.setDate(diff));
+                    
+                    const dayStr = String(monday.getDate()).padStart(2, '0');
+                    const monthStr = monthsShort[monday.getMonth()];
+                    const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
+                    const label = `Minggu ${dayStr} ${monthStr}`;
+                    return { key, label };
+                } 
+                else { // daily
+                    const dayStr = String(dateObj.getDate()).padStart(2, '0');
+                    const monthStr = monthsShort[dateObj.getMonth()];
+                    const yearStr = dateObj.getFullYear().toString().slice(-2);
+                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
+                    const label = `${dayStr}-${monthStr}-${yearStr}`;
+                    return { key, label };
+                }
+            }
+
+            const datesMap = {};
+            const keyToLabelMap = {};
+            let current = new Date(start);
+
+            while (current <= end) {
+                const { key, label } = getKeyAndLabel(current);
+                if (!datesMap[key]) {
+                    datesMap[key] = { DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
+                    keyToLabelMap[key] = label;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+
+            filteredData.forEach(item => {
+                const pDate = parseDate(item.tglService);
+                if (pDate) {
+                    const { key } = getKeyAndLabel(pDate);
+                    if (datesMap[key]) {
+                        if (datesMap[key][item.status] !== undefined) {
+                            datesMap[key][item.status]++;
+                        }
+                    }
                 }
             });
 
-            const labels = Object.keys(datesMap);
-            const datangData = labels.map(l => datesMap[l].DATANG);
-            const tidakDatangData = labels.map(l => datesMap[l]['TIDAK DATANG']);
-            const belumDatangData = labels.map(l => datesMap[l]['BELUM DATANG']);
+            const sortedKeys = Object.keys(datesMap).sort();
+            const labels = sortedKeys.map(k => keyToLabelMap[k]);
+            const datangData = sortedKeys.map(k => datesMap[k].DATANG);
+            const tidakDatangData = sortedKeys.map(k => datesMap[k]['TIDAK DATANG']);
+            const belumDatangData = sortedKeys.map(k => datesMap[k]['BELUM DATANG']);
 
             if (chartInstances.trendChart) chartInstances.trendChart.destroy();
 
@@ -498,7 +574,7 @@
                     plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { beginAtZero: true, ticks: { font: { size: 10 } } }
+                        y: { beginAtZero: true, ticks: { font: { size: 10 }, precision: 0 } }
                     }
                 }
             });
@@ -533,7 +609,7 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                        x: { beginAtZero: true, ticks: { font: { size: 10 }, precision: 0 } },
                         y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     }
                 }
