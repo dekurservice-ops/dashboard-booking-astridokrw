@@ -8,219 +8,283 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse CDN -->
+    <!-- PapaParse CDN untuk Parse CSV -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- OVERLAY SIDEBAR -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
+    <!-- OVERLAY SIDEBAR MOBILE -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
-        <div class="p-6 border-b border-slate-100 flex flex-col gap-4">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
+        <div class="p-5 border-b border-slate-100 flex flex-col gap-3 relative">
+            <button onclick="toggleSidebar()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
             <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-red-600 text-white rounded-xl shadow-lg shadow-red-200">
+                <div class="p-2.5 bg-red-600 text-white rounded-xl shadow-md shadow-red-200">
                     <i data-lucide="car" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h2 class="font-extrabold text-slate-900 text-base leading-tight uppercase">Astrido Karawang</h2>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-wide">dekurservice@gmail.com</p>
+                    <h2 class="font-bold text-slate-900 text-base leading-tight">Astrido Karawang</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">dekurservice@gmail.com</p>
                 </div>
             </div>
         </div>
 
-        <nav class="p-4 space-y-2 flex-1">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl transition-all border border-red-100/50">
+        <nav class="p-4 space-y-1.5 flex-1">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span>Booking</span>
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 font-semibold rounded-xl opacity-60 cursor-not-allowed group">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 font-medium rounded-xl hover:bg-slate-50 transition-all cursor-not-allowed opacity-70">
                 <i data-lucide="package" class="w-5 h-5"></i>
                 <div class="flex-1 flex items-center justify-between">
                     <span>Special Order Part</span>
-                    <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full uppercase">Soon</span>
+                    <span class="text-[10px] bg-slate-100 text-slate-500 font-normal px-2 py-0.5 rounded-full">Soon</span>
                 </div>
             </a>
         </nav>
 
-        <div class="p-4 border-t border-slate-100 text-center">
-            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Aftersales Analytics v1.0</p>
+        <div class="p-4 border-t border-slate-100">
+            <div class="bg-slate-50 p-3 rounded-xl flex items-center gap-3 text-xs text-slate-500">
+                <i data-lucide="info" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                <span>Live CSV Auto-Sync Enabled</span>
+            </div>
         </div>
     </aside>
 
-    <!-- HEADER -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
+    <!-- HEADER DASHBOARD UTAMA -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button onclick="toggleSidebar()" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors focus:outline-none">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
                 <div>
-                    <h1 class="text-sm sm:text-xl font-extrabold text-slate-900 leading-none tracking-tight">Astrido Karawang Aftersales Dashboard</h1>
-                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">Aftersales Monitoring Analytics</p>
+                    <h1 class="text-base sm:text-xl font-bold text-slate-900 leading-tight">Astrido Karawang Aftersales Dashboard</h1>
+                    <p class="text-xs text-slate-500">Aftersales Monitoring Analytics</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="hidden sm:inline-flex relative h-2 w-2 rounded-full bg-emerald-500"></span>
-                <span id="lastUpdate" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Syncing...</span>
-            </div>
+            <button onclick="fetchData()" class="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-colors">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i>
+                <span class="hidden sm:inline">Refresh Data</span>
+            </button>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
         <!-- FILTER BAR -->
         <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-            <div class="flex items-center gap-2 text-slate-700 font-bold text-xs uppercase tracking-widest">
+            <div class="flex items-center gap-2 text-slate-700 font-semibold text-sm">
                 <i data-lucide="filter" class="w-4 h-4 text-red-600"></i>
-                <span>Filter Dashboard</span>
+                <span>Filter Analytics:</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 flex-1 md:justify-end">
-                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-                    <input type="date" id="startDate" onchange="applyFilters()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
-                    <span class="text-slate-300">-</span>
-                    <input type="date" id="endDate" onchange="applyFilters()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 items-center flex-1 md:justify-end">
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                    <label class="text-xs text-slate-500 whitespace-nowrap">Rentang Service:</label>
+                    <input type="date" id="startDate" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="date" id="endDate" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
                 </div>
-                <select id="filterMra" onchange="applyFilters()" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 outline-none">
-                    <option value="ALL">SEMUA MRA</option>
-                </select>
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                    <label class="text-xs text-slate-500 whitespace-nowrap">Nama MRA:</label>
+                    <select id="filterMra" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none w-full">
+                        <option value="ALL">Semua MRA</option>
+                    </select>
+                </div>
             </div>
         </section>
 
-        <!-- KPI CARDS -->
+        <!-- 6 KPI CARDS SUMMARY -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             <div onclick="openModal('TOTAL BOOKING')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Booking</p>
-                <div id="kpiTotal" class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none">0</div>
-                <div class="mt-2 h-1 w-8 bg-blue-500 rounded-full"></div>
-            </div>
-            <div onclick="openModal('DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Datang</p>
-                <div id="kpiDatang" class="text-xl sm:text-2xl font-extrabold text-emerald-600 leading-none">0</div>
-                <div class="mt-2 h-1 w-8 bg-emerald-500 rounded-full"></div>
-            </div>
-            <div onclick="openModal('TIDAK DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tidak Datang</p>
-                <div id="kpiTidakDatang" class="text-xl sm:text-2xl font-extrabold text-rose-600 leading-none">0</div>
-                <div class="mt-2 h-1 w-8 bg-rose-500 rounded-full"></div>
-            </div>
-            <div onclick="openModal('BELUM DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Belum Datang</p>
-                <div id="kpiBelum" class="text-xl sm:text-2xl font-extrabold text-amber-500 leading-none">0</div>
-                <div class="mt-2 h-1 w-8 bg-amber-500 rounded-full"></div>
-            </div>
-            <div onclick="openModal('SHOW RATE (%)')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Show Rate</p>
-                <div id="kpiRate" class="text-xl sm:text-2xl font-extrabold text-indigo-600 leading-none">0%</div>
-                <div class="mt-2 h-1 w-8 bg-indigo-500 rounded-full"></div>
-            </div>
-            <div onclick="openModal('ACTIVE MRA')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active MRA</p>
-                <div id="kpiMra" class="text-xl sm:text-2xl font-extrabold text-purple-600 leading-none">0</div>
-                <div class="mt-2 h-1 w-8 bg-purple-500 rounded-full"></div>
-            </div>
-        </section>
-
-        <!-- CHARTS -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-6 flex items-center gap-2">
-                    <i data-lucide="line-chart" class="w-4 h-4 text-blue-500"></i> Trend Kedatangan
-                </h3>
-                <div class="h-72"><canvas id="trendChart"></canvas></div>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-6 flex items-center gap-2">
-                    <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i> Distribusi Order
-                </h3>
-                <div class="h-72 flex items-center justify-center"><canvas id="orderChart"></canvas></div>
-            </div>
-            <div class="lg:col-span-2 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-6 flex items-center gap-2">
-                    <i data-lucide="bar-chart-horizontal" class="w-4 h-4 text-emerald-500"></i> Top Sumber Data Booking
-                </h3>
-                <div class="h-64"><canvas id="sourceChart"></canvas></div>
-            </div>
-        </section>
-
-        <!-- LEADERBOARD -->
-        <section class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-                <div>
-                    <h3 class="font-extrabold text-slate-900 text-base">Performance Leaderboard MRA</h3>
-                    <p class="text-xs text-slate-400 font-medium">Berdasarkan Show Rate (%) tertinggi</p>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">TOTAL BOOKING</span>
+                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                    </div>
                 </div>
-                <div class="p-2.5 bg-amber-100 text-amber-600 rounded-xl shadow-sm"><i data-lucide="award" class="w-5 h-5"></i></div>
+                <div id="kpiTotalBooking" class="text-xl sm:text-2xl font-bold text-slate-900">-</div>
+                <span class="text-[10px] text-blue-600 font-medium">Klik detail data &rarr;</span>
+            </div>
+
+            <div onclick="openModal('TOTAL DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">TOTAL DATANG</span>
+                    <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div id="kpiTotalDatang" class="text-xl sm:text-2xl font-bold text-emerald-600">-</div>
+                <span class="text-[10px] text-emerald-600 font-medium">Klik detail data &rarr;</span>
+            </div>
+
+            <div onclick="openModal('TIDAK DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">TIDAK DATANG</span>
+                    <div class="p-1.5 bg-rose-50 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div id="kpiTidakDatang" class="text-xl sm:text-2xl font-bold text-rose-600">-</div>
+                <span class="text-[10px] text-rose-600 font-medium">Klik detail data &rarr;</span>
+            </div>
+
+            <div onclick="openModal('BELUM DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">BELUM DATANG</span>
+                    <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div id="kpiBelumDatang" class="text-xl sm:text-2xl font-bold text-amber-600">-</div>
+                <span class="text-[10px] text-amber-600 font-medium">Klik detail data &rarr;</span>
+            </div>
+
+            <div onclick="openModal('SHOW RATE (%)')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">SHOW RATE</span>
+                    <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div id="kpiShowRate" class="text-xl sm:text-2xl font-bold text-indigo-600">-%</div>
+                <span class="text-[10px] text-indigo-600 font-medium">Klik detail data &rarr;</span>
+            </div>
+
+            <div onclick="openModal('ACTIVE MRA')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-500">ACTIVE MRA</span>
+                    <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div id="kpiActiveMra" class="text-xl sm:text-2xl font-bold text-purple-600">-</div>
+                <span class="text-[10px] text-purple-600 font-medium">Klik rangkuman MRA &rarr;</span>
+            </div>
+        </section>
+
+        <!-- CHARTS SECTION -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Trend Kedatangan Service</h3>
+                        <p class="text-xs text-slate-400">Berdasarkan Service Tanggal</p>
+                    </div>
+                    <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="line-chart" class="w-4 h-4"></i></span>
+                </div>
+                <div class="relative flex-1 min-h-[260px]">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Top Sumber Data Booking</h3>
+                        <p class="text-xs text-slate-400">Jumlah Booking berdasarkan Media/Sumber Data</p>
+                    </div>
+                    <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="bar-chart-horizontal" class="w-4 h-4"></i></span>
+                </div>
+                <div class="relative flex-1 min-h-[260px]">
+                    <canvas id="sumberDataChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD PERFORMANCE MRA -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Leaderboard Performance MRA</h3>
+                    <p class="text-xs text-slate-400">Performa pencapaian kedatangan service berdasarkan MRA</p>
+                </div>
+                <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                    <i data-lucide="trophy" class="w-5 h-5"></i>
+                </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-widest text-[9px]">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-100">
                         <tr>
-                            <th class="py-4 px-6 text-center">Rank</th>
-                            <th class="py-4 px-6">Nama MRA</th>
-                            <th class="py-4 px-6 text-center">Total</th>
-                            <th class="py-4 px-6 text-center text-emerald-600">Datang</th>
-                            <th class="py-4 px-6 text-center text-rose-600">Tidak</th>
-                            <th class="py-4 px-6 text-center">Belum</th>
-                            <th class="py-4 px-6 text-center">Show Rate</th>
+                            <th class="py-3.5 px-4 text-center">Rank</th>
+                            <th class="py-3.5 px-4">Nama MRA</th>
+                            <th class="py-3.5 px-4 text-center">Total Booking</th>
+                            <th class="py-3.5 px-4 text-center">Datang</th>
+                            <th class="py-3.5 px-4 text-center">Tidak Datang</th>
+                            <th class="py-3.5 px-4 text-center">Belum Datang</th>
+                            <th class="py-3.5 px-4 text-center">Show Rate (%)</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboardBody" class="divide-y divide-slate-100 font-bold text-slate-700">
-                        <!-- Content JS -->
+                    <tbody id="mraTableBody" class="divide-y divide-slate-100 font-medium">
                     </tbody>
                 </table>
             </div>
         </section>
+
     </main>
 
-    <!-- MODAL -->
-    <div id="dataModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-all">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <!-- POPUP MODAL DETAIL DATA KPI -->
+    <div id="kpiModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <div>
-                    <h3 id="modalTitle" class="font-extrabold text-slate-900 text-lg uppercase tracking-tight">Detail Data</h3>
-                    <p id="modalSubtitle" class="text-xs text-slate-400 font-bold uppercase tracking-widest">Database Monitoring</p>
+                    <h3 id="modalTitle" class="font-bold text-slate-900 text-base">Detail Data KPI</h3>
+                    <p id="modalSubtitle" class="text-xs text-slate-500">Daftar transaksi unit booking</p>
                 </div>
-                <button onclick="closeModal()" class="p-2.5 rounded-2xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                <button onclick="closeModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <div class="p-4 flex-1 overflow-y-auto max-h-[60vh]">
-                <div class="rounded-2xl border border-slate-200 overflow-x-auto relative shadow-inner">
+
+            <div class="p-4 sm:p-5 flex-1 overflow-y-auto">
+                <div class="rounded-xl border border-slate-200 overflow-x-auto max-h-[60vh] relative">
                     <table class="w-full text-left text-xs border-collapse">
-                        <thead id="modalHead" class="bg-slate-900 text-slate-200 font-bold uppercase tracking-widest text-[9px] sticky top-0 z-20 shadow-md">
-                            <!-- Populated dynamically -->
+                        <thead id="modalTableHeader" class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-20 shadow-sm">
                         </thead>
-                        <tbody id="modalBody" class="divide-y divide-slate-100 font-bold text-slate-700">
-                            <!-- Populated dynamically -->
+                        <tbody id="modalTableBody" class="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="p-6 border-t border-slate-100 bg-slate-50/80 flex justify-between items-center">
-                <span id="modalCounter" class="text-[10px] font-black text-slate-400 uppercase tracking-[2px]">0 Records</span>
-                <button onclick="closeModal()" class="px-8 py-3 bg-slate-900 text-white font-black text-xs rounded-2xl hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all">TUTUP MODUL</button>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-xs text-slate-500">
+                <span id="modalRecordCount">Total: 0 Record</span>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-900 transition-colors">Tutup</button>
             </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC DYNAMIS & OTOMATIS -->
     <script>
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgLQ8hj-ab5ZOJu31Z1d2gyWxeYNxl4BXHjXYZSq9eaAAnURBkcv61joIaU0Qpj-7G-eQ-yV2uGAIz/pub?gid=0&single=true&output=csv';
-        let rawData = [], filteredData = [];
-        let charts = {};
+
+        let rawData = [];
+        let filteredData = [];
+        let chartInstances = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -228,217 +292,411 @@
         });
 
         function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('sidebarOverlay');
-            const isOpen = !sb.classList.contains('-translate-x-full');
-            
-            if(isOpen) {
-                sb.classList.add('-translate-x-full');
-                ov.classList.add('hidden');
-            } else {
-                sb.classList.remove('-translate-x-full');
-                ov.classList.remove('hidden');
-            }
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
         }
 
-        async function fetchData() {
-            Papa.parse(CSV_URL, {
+        function fetchData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if(refreshIcon) refreshIcon.classList.add('animate-spin');
+
+            // Cache buster parameter agar selalu mengambil CSV paling baru tanpa ter-cache
+            const dynamicUrl = `${CSV_URL}&_t=${new Date().getTime()}`;
+
+            Papa.parse(dynamicUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
-                complete: (results) => {
-                    rawData = results.data;
-                    initFilters();
+                complete: function(results) {
+                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+                    rawData = processRawData(results.data);
+                    
+                    // Otomatisasi komponen filter berdasarkan data ter-update
+                    populateMraFilterOptions();
+                    initDateRangeFilter();
+                    
                     applyFilters();
-                    document.getElementById('lastUpdate').textContent = 'Live Sync: ' + new Date().toLocaleTimeString();
+                },
+                error: function(err) {
+                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+                    console.error("Gagal membaca CSV:", err);
                 }
             });
         }
 
-        function initFilters() {
-            const mras = [...new Set(rawData.map(r => r['Nama MRA']))].filter(Boolean).sort();
-            const select = document.getElementById('filterMra');
-            mras.forEach(mra => {
-                const opt = document.createElement('option');
-                opt.value = mra; opt.textContent = mra;
-                select.appendChild(opt);
+        function processRawData(data) {
+            return data.map(row => {
+                const nopol = row['Nomor Polisi'] || '-';
+                const sumber = row['Sumber Data'] || 'Lainnya';
+                const tglService = row['Service Tanggal'] || '-';
+                const mra = (row['Nama MRA'] || 'Unassigned').trim();
+                const caiVal = (row['CAI'] || '').trim().toUpperCase();
+
+                let status = 'BELUM DATANG';
+                if (caiVal === 'DATANG') {
+                    status = 'DATANG';
+                } else if (caiVal === 'TIDAK DATANG') {
+                    status = 'TIDAK DATANG';
+                }
+
+                return {
+                    nopol,
+                    sumber,
+                    tglService,
+                    mra: mra !== '' ? mra : 'Unassigned',
+                    status
+                };
             });
         }
 
-        function getStatus(row) {
-            const cai = (row['CAI'] || '').trim().toUpperCase();
-            if (cai === 'DATANG') return 'DATANG';
-            if (cai === 'TIDAK DATANG') return 'TIDAK DATANG';
-            return 'BELUM DATANG';
+        // OTOMATISASI LIST MRA BERDASARKAN HASIL SCAN REAL-TIME CSV
+        function populateMraFilterOptions() {
+            const filterMra = document.getElementById('filterMra');
+            const currentSelected = filterMra.value;
+
+            // Ekstrak secara otomatis semua nama MRA unik yang terdaftar
+            const mraList = [...new Set(rawData.map(item => item.mra))]
+                .filter(m => m !== 'Unassigned' && m !== '-' && m !== '')
+                .sort();
+            
+            filterMra.innerHTML = '<option value="ALL">Semua MRA</option>';
+            mraList.forEach(mra => {
+                const opt = document.createElement('option');
+                opt.value = mra;
+                opt.textContent = mra;
+                filterMra.appendChild(opt);
+            });
+
+            // Pertahankan pilihan user jika MRA tersebut masih ada
+            if (mraList.includes(currentSelected)) {
+                filterMra.value = currentSelected;
+            }
+        }
+
+        // OTOMATISASI RENTANG TANGGAL BERDASARKAN MIN-MAX DATA DARI CSV
+        function initDateRangeFilter() {
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+
+            if (startInput.value || endInput.value) return; // Jika user sudah pilih manual, jangan overwrite
+
+            const validDates = rawData
+                .map(item => parseDate(item.tglService))
+                .filter(d => d !== null);
+
+            if (validDates.length > 0) {
+                const minDate = new Date(Math.min(...validDates));
+                const maxDate = new Date(Math.max(...validDates));
+
+                startInput.value = minDate.toISOString().split('T')[0];
+                endInput.value = maxDate.toISOString().split('T')[0];
+            }
         }
 
         function applyFilters() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-            const mra = document.getElementById('filterMra').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const selectedMra = document.getElementById('filterMra').value;
 
             filteredData = rawData.filter(item => {
-                const matchMra = mra === 'ALL' || item['Nama MRA'] === mra;
-                let matchDate = true;
-                if(start || end) {
-                    const svcDate = new Date(item['Service Tanggal']);
-                    if(start && svcDate < new Date(start)) matchDate = false;
-                    if(end && svcDate > new Date(end)) matchDate = false;
+                if (selectedMra !== 'ALL' && item.mra !== selectedMra) {
+                    return false;
                 }
-                return matchMra && matchDate;
+
+                if (startDate || endDate) {
+                    const itemDate = parseDate(item.tglService);
+                    if (itemDate) {
+                        if (startDate && itemDate < new Date(startDate)) return false;
+                        if (endDate) {
+                            const eDate = new Date(endDate);
+                            eDate.setHours(23, 59, 59, 999);
+                            if (itemDate > eDate) return false;
+                        }
+                    }
+                }
+                return true;
             });
 
-            updateUI();
+            updateKPIs();
             renderCharts();
+            renderMraLeaderboard();
         }
 
-        function updateUI() {
-            const total = filteredData.length;
-            const datang = filteredData.filter(d => getStatus(d) === 'DATANG').length;
-            const tidak = filteredData.filter(d => getStatus(d) === 'TIDAK DATANG').length;
-            const belum = filteredData.filter(d => getStatus(d) === 'BELUM DATANG').length;
-            const rate = total > 0 ? ((datang / total) * 100).toFixed(1) : 0;
-            const mras = [...new Set(filteredData.map(d => d['Nama MRA']))].filter(Boolean).length;
+        function parseDate(dateStr) {
+            if (!dateStr || dateStr === '-') return null;
+            const parsed = new Date(dateStr);
+            if (!isNaN(parsed)) return parsed;
 
-            document.getElementById('kpiTotal').textContent = total;
-            document.getElementById('kpiDatang').textContent = datang;
-            document.getElementById('kpiTidakDatang').textContent = tidak;
-            document.getElementById('kpiBelum').textContent = belum;
-            document.getElementById('kpiRate').textContent = rate + '%';
-            document.getElementById('kpiMra').textContent = mras;
+            const parts = dateStr.split('-');
+            if(parts.length === 3) {
+                const day = parts[0].trim();
+                const monthStr = parts[1].trim();
+                let year = parts[2].trim();
+                if(year.length === 2) year = '20' + year;
+                return new Date(`${monthStr} ${day}, ${year}`);
+            }
+            return null;
+        }
 
-            // Table Leaderboard
-            const mraStats = {};
-            filteredData.forEach(r => {
-                const name = r['Nama MRA'] || 'Unknown';
-                if(!mraStats[name]) mraStats[name] = { total: 0, d: 0, t: 0, b: 0 };
-                mraStats[name].total++;
-                const s = getStatus(r);
-                if(s==='DATANG') mraStats[name].d++;
-                else if(s==='TIDAK DATANG') mraStats[name].t++;
-                else mraStats[name].b++;
-            });
+        function updateKPIs() {
+            const totalBooking = filteredData.length;
+            const totalDatang = filteredData.filter(d => d.status === 'DATANG').length;
+            const tidakDatang = filteredData.filter(d => d.status === 'TIDAK DATANG').length;
+            const belumDatang = filteredData.filter(d => d.status === 'BELUM DATANG').length;
+            const showRate = totalBooking > 0 ? ((totalDatang / totalBooking) * 100).toFixed(1) : 0;
+            
+            const activeMras = new Set(filteredData.map(d => d.mra).filter(m => m !== 'Unassigned' && m !== '-' && m !== '')).size;
 
-            const sorted = Object.entries(mraStats).map(([name, s]) => ({
-                name, ...s, rate: ((s.d/s.total)*100).toFixed(1)
-            })).sort((a,b) => b.rate - a.rate);
-
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = sorted.map((m, i) => {
-                const color = m.rate >= 60 ? 'text-emerald-600 bg-emerald-50' : (m.rate >= 40 ? 'text-amber-600 bg-amber-50' : 'text-rose-600 bg-rose-50');
-                return `<tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-4 px-6 text-center font-black text-slate-300">#${i+1}</td>
-                    <td class="py-4 px-6 uppercase">${m.name}</td>
-                    <td class="py-4 px-6 text-center font-medium">${m.total}</td>
-                    <td class="py-4 px-6 text-center text-emerald-600">${m.d}</td>
-                    <td class="py-4 px-6 text-center text-rose-600">${m.t}</td>
-                    <td class="py-4 px-6 text-center text-slate-400">${m.b}</td>
-                    <td class="py-4 px-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black border ${color}">${m.rate}%</span></td>
-                </tr>`;
-            }).join('');
+            document.getElementById('kpiTotalBooking').textContent = totalBooking.toLocaleString('id-ID');
+            document.getElementById('kpiTotalDatang').textContent = totalDatang.toLocaleString('id-ID');
+            document.getElementById('kpiTidakDatang').textContent = tidakDatang.toLocaleString('id-ID');
+            document.getElementById('kpiBelumDatang').textContent = belumDatang.toLocaleString('id-ID');
+            document.getElementById('kpiShowRate').textContent = `${showRate}%`;
+            document.getElementById('kpiActiveMra').textContent = activeMras;
         }
 
         function renderCharts() {
-            // Trend Chart
-            const trendMap = {};
-            filteredData.forEach(r => {
-                const d = r['Service Tanggal'] || 'N/A';
-                if(!trendMap[d]) trendMap[d] = {d:0, t:0, b:0};
-                const s = getStatus(r);
-                if(s==='DATANG') trendMap[d].d++;
-                else if(s==='TIDAK DATANG') trendMap[d].t++;
-                else trendMap[d].b++;
-            });
-            const labels = Object.keys(trendMap).sort();
-            
-            initChart('trendChart', 'line', {
-                labels,
-                datasets: [
-                    { label: 'Datang', data: labels.map(l=>trendMap[l].d), borderColor: '#10b981', backgroundColor: '#10b98115', fill: true, tension: 0.3 },
-                    { label: 'Tidak', data: labels.map(l=>trendMap[l].t), borderColor: '#f43f5e', tension: 0.3 },
-                    { label: 'Belum', data: labels.map(l=>trendMap[l].b), borderColor: '#f59e0b', tension: 0.3 }
-                ]
-            });
-
-            // Order Chart
-            const orders = {};
-            filteredData.forEach(r => { const o = r['Order Pekerjaan'] || 'Lain'; orders[o] = (orders[o]||0)+1; });
-            initChart('orderChart', 'doughnut', {
-                labels: Object.keys(orders),
-                datasets: [{ data: Object.values(orders), backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'] }]
-            });
-
-            // Source Chart
-            const sources = {};
-            filteredData.forEach(r => { const s = r['Sumber Data'] || 'Lain'; sources[s] = (sources[s]||0)+1; });
-            const sSorted = Object.entries(sources).sort((a,b)=>b[1]-a[1]).slice(0,5);
-            initChart('sourceChart', 'bar', {
-                labels: sSorted.map(x=>x[0]),
-                datasets: [{ label: 'Total Unit', data: sSorted.map(x=>x[1]), backgroundColor: '#10b981', borderRadius: 8 }]
-            }, { indexAxis: 'y' });
+            renderTrendChart();
+            renderSumberDataChart();
         }
 
-        function initChart(id, type, data, options = {}) {
-            if(charts[id]) charts[id].destroy();
-            const ctx = document.getElementById(id).getContext('2d');
-            charts[id] = new Chart(ctx, {
-                type, data,
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' }, boxWidth: 10 } } },
-                    scales: type !== 'doughnut' ? { 
-                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } },
-                        y: { beginAtZero: true, ticks: { font: { size: 9, weight: 'bold' } } }
-                    } : {},
-                    ...options
+        function renderTrendChart() {
+            const datesMap = {};
+            filteredData.forEach(item => {
+                const dateKey = item.tglService;
+                if (!datesMap[dateKey]) {
+                    datesMap[dateKey] = { DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
                 }
+                if (datesMap[dateKey][item.status] !== undefined) {
+                    datesMap[dateKey][item.status]++;
+                }
+            });
+
+            const labels = Object.keys(datesMap);
+            const datangData = labels.map(l => datesMap[l].DATANG);
+            const tidakDatangData = labels.map(l => datesMap[l]['TIDAK DATANG']);
+            const belumDatangData = labels.map(l => datesMap[l]['BELUM DATANG']);
+
+            if (chartInstances.trendChart) chartInstances.trendChart.destroy();
+
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            chartInstances.trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Datang', data: datangData, borderColor: '#10b981', backgroundColor: '#10b98120', tension: 0.3, fill: true },
+                        { label: 'Tidak Datang', data: tidakDatangData, borderColor: '#ef4444', backgroundColor: '#ef444420', tension: 0.3, fill: true },
+                        { label: 'Belum Datang', data: belumDatangData, borderColor: '#f59e0b', backgroundColor: '#f59e0b20', tension: 0.3, fill: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { beginAtZero: true, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function renderSumberDataChart() {
+            const counts = {};
+            filteredData.forEach(item => {
+                counts[item.sumber] = (counts[item.sumber] || 0) + 1;
+            });
+
+            const sortedKeys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0, 7);
+            const dataVals = sortedKeys.map(k => counts[k]);
+
+            if (chartInstances.sumberDataChart) chartInstances.sumberDataChart.destroy();
+
+            const ctx = document.getElementById('sumberDataChart').getContext('2d');
+            chartInstances.sumberDataChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedKeys,
+                    datasets: [{
+                        label: 'Total Booking',
+                        data: dataVals,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function renderMraLeaderboard() {
+            const mraStats = {};
+
+            filteredData.forEach(item => {
+                const name = item.mra;
+                if (!mraStats[name]) {
+                    mraStats[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
+                }
+                mraStats[name].total++;
+                if (item.status === 'DATANG') mraStats[name].datang++;
+                else if (item.status === 'TIDAK DATANG') mraStats[name].tidak++;
+                else mraStats[name].belum++;
+            });
+
+            const sortedMra = Object.keys(mraStats).map(name => {
+                const total = mraStats[name].total;
+                const datang = mraStats[name].datang;
+                const showRate = total > 0 ? ((datang / total) * 100).toFixed(1) : 0;
+                return { name, ...mraStats[name], showRate: parseFloat(showRate) };
+            }).sort((a,b) => b.showRate - a.showRate || b.total - a.total);
+
+            const tbody = document.getElementById('mraTableBody');
+            tbody.innerHTML = '';
+
+            if (sortedMra.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">Tidak ada data ditemukan</td></tr>`;
+                return;
+            }
+
+            sortedMra.forEach((mra, index) => {
+                let badgeClass = 'bg-red-50 text-red-600 border-red-200';
+                if (mra.showRate > 60) {
+                    badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                } else if (mra.showRate >= 40) {
+                    badgeClass = 'bg-amber-50 text-amber-600 border-amber-200';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-amber-100 text-amber-700' : index === 1 ? 'bg-slate-200 text-slate-700' : index === 2 ? 'bg-amber-800/10 text-amber-800' : 'text-slate-500'}">
+                            ${index + 1}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${mra.name}</td>
+                    <td class="py-3 px-4 text-center font-semibold text-slate-700">${mra.total}</td>
+                    <td class="py-3 px-4 text-center text-emerald-600 font-semibold">${mra.datang}</td>
+                    <td class="py-3 px-4 text-center text-rose-600">${mra.tidak}</td>
+                    <td class="py-3 px-4 text-center text-amber-600">${mra.belum}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${badgeClass}">
+                            ${mra.showRate}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
         function openModal(cardType) {
-            const modal = document.getElementById('dataModal');
-            const head = document.getElementById('modalHead');
-            const body = document.getElementById('modalBody');
+            const modal = document.getElementById('kpiModal');
             const title = document.getElementById('modalTitle');
-            const counter = document.getElementById('modalCounter');
+            const subtitle = document.getElementById('modalSubtitle');
+            const thead = document.getElementById('modalTableHeader');
+            const tbody = document.getElementById('modalTableBody');
+            const countText = document.getElementById('modalRecordCount');
 
-            title.textContent = cardType;
-            let displayData = [];
-            let isMraSummary = cardType === 'ACTIVE MRA';
+            title.textContent = `Detail Data: ${cardType}`;
+            subtitle.textContent = `Menampilkan rincian daftar unit berdasarkan kriteria ${cardType}`;
 
-            if(isMraSummary) {
-                head.innerHTML = `<tr><th class="py-4 px-6">Nama MRA</th><th class="py-4 px-6 text-center">Total Handled</th><th class="py-4 px-6 text-center">Datang</th><th class="py-4 px-6 text-center">Tidak</th><th class="py-4 px-6 text-center">Belum</th></tr>`;
-                const mraStats = {};
-                filteredData.forEach(r => {
-                    const name = r['Nama MRA'] || 'Unassigned';
-                    if(!mraStats[name]) mraStats[name] = { total: 0, d: 0, t: 0, b: 0 };
-                    mraStats[name].total++;
-                    const s = getStatus(r);
-                    if(s==='DATANG') mraStats[name].d++;
-                    else if(s==='TIDAK DATANG') mraStats[name].t++;
-                    else mraStats[name].b++;
-                });
-                const list = Object.entries(mraStats).sort((a,b)=>b[1].total - a[1].total);
-                body.innerHTML = list.map(([name, s]) => `<tr><td class="py-3 px-6 uppercase">${name}</td><td class="py-3 px-6 text-center font-bold text-blue-600">${s.total}</td><td class="py-3 px-6 text-center text-emerald-600">${s.d}</td><td class="py-3 px-6 text-center text-rose-600">${s.t}</td><td class="py-3 px-6 text-center text-slate-400">${s.b}</td></tr>`).join('');
-                counter.textContent = list.length + ' Personil MRA';
+            let dataToDisplay = [];
+            let isMraSummaryMode = false;
+
+            if (cardType === 'TOTAL BOOKING') {
+                dataToDisplay = filteredData;
+            } else if (cardType === 'TOTAL DATANG') {
+                dataToDisplay = filteredData.filter(d => d.status === 'DATANG');
+            } else if (cardType === 'TIDAK DATANG') {
+                dataToDisplay = filteredData.filter(d => d.status === 'TIDAK DATANG');
+            } else if (cardType === 'BELUM DATANG') {
+                dataToDisplay = filteredData.filter(d => d.status === 'BELUM DATANG');
+            } else if (cardType === 'SHOW RATE (%)') {
+                dataToDisplay = filteredData;
+            } else if (cardType === 'ACTIVE MRA') {
+                isMraSummaryMode = true;
+            }
+
+            if (!isMraSummaryMode) {
+                thead.innerHTML = `
+                    <tr>
+                        <th class="py-3 px-4 text-left">Nomor Polisi</th>
+                        <th class="py-3 px-4 text-left">Service Tanggal</th>
+                        <th class="py-3 px-4 text-left">Nama MRA</th>
+                    </tr>
+                `;
+
+                tbody.innerHTML = '';
+                if (dataToDisplay.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">Tidak ada data unit.</td></tr>`;
+                } else {
+                    dataToDisplay.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `
+                            <td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td>
+                            <td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td>
+                            <td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                countText.textContent = `Total: ${dataToDisplay.length} Unit Booking`;
             } else {
-                head.innerHTML = `<tr><th class="py-4 px-6">No Polisi</th><th class="py-4 px-6">Pekerjaan</th><th class="py-4 px-6">Tgl BOC</th><th class="py-4 px-6">Tgl Service</th><th class="py-4 px-6">Nama MRA</th></tr>`;
-                if(cardType === 'TOTAL BOOKING' || cardType === 'SHOW RATE (%)') displayData = filteredData;
-                else if(cardType === 'DATANG') displayData = filteredData.filter(d => getStatus(d) === 'DATANG');
-                else if(cardType === 'TIDAK DATANG') displayData = filteredData.filter(d => getStatus(d) === 'TIDAK DATANG');
-                else if(cardType === 'BELUM DATANG') displayData = filteredData.filter(d => getStatus(d) === 'BELUM DATANG');
+                thead.innerHTML = `
+                    <tr>
+                        <th class="py-3 px-4 text-left">Nama MRA</th>
+                        <th class="py-3 px-4 text-center">Total Unit Handled</th>
+                        <th class="py-3 px-4 text-center">Datang</th>
+                        <th class="py-3 px-4 text-center">Tidak Datang</th>
+                        <th class="py-3 px-4 text-center">Belum Datang</th>
+                    </tr>
+                `;
 
-                body.innerHTML = displayData.map(r => `<tr class="hover:bg-slate-50 transition-colors"><td class="py-3 px-6 font-black text-blue-600">${r['Nomor Polisi'] || '-'}</td><td class="py-3 px-6 font-medium text-slate-600">${r['Order Pekerjaan'] || '-'}</td><td class="py-3 px-6 text-slate-400 font-bold">${r['Tanggal BOC'] || '-'}</td><td class="py-3 px-6 text-slate-900 font-black">${r['Service Tanggal'] || '-'}</td><td class="py-3 px-6 uppercase opacity-70">${r['Nama MRA'] || '-'}</td></tr>`).join('');
-                counter.textContent = displayData.length + ' Baris Data';
+                const mraMap = {};
+                filteredData.forEach(item => {
+                    const name = item.mra;
+                    if (!mraMap[name]) mraMap[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
+                    mraMap[name].total++;
+                    if (item.status === 'DATANG') mraMap[name].datang++;
+                    else if (item.status === 'TIDAK DATANG') mraMap[name].tidak++;
+                    else mraMap[name].belum++;
+                });
+
+                tbody.innerHTML = '';
+                const mraList = Object.keys(mraMap);
+                mraList.forEach(mraName => {
+                    const stat = mraMap[mraName];
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-4 font-bold text-slate-800">${mraName}</td>
+                        <td class="py-2.5 px-4 text-center font-bold text-slate-900">${stat.total}</td>
+                        <td class="py-2.5 px-4 text-center text-emerald-600 font-semibold">${stat.datang}</td>
+                        <td class="py-2.5 px-4 text-center text-rose-600 font-semibold">${stat.tidak}</td>
+                        <td class="py-2.5 px-4 text-center text-amber-600 font-semibold">${stat.belum}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                countText.textContent = `Total: ${mraList.length} Personel MRA Aktif`;
             }
 
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            document.getElementById('dataModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            document.getElementById('kpiModal').classList.add('hidden');
         }
     </script>
 </body>
