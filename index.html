@@ -3,38 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrido Karawang Aftersales Dashboard</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Astrido Karawang - Aftersales Dashboard</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse CDN untuk Parse CSV -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <!-- Lucide Icons CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .kpi-card { transition: all 0.2s ease-in-out; cursor: pointer; }
+        .kpi-card:hover { transform: translateY(-3px); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- OVERLAY SIDEBAR MOBILE -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
-    <!-- SIDEBAR NAVIGATION -->
     <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
         <div class="p-5 border-b border-slate-100 flex flex-col gap-3 relative">
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
@@ -52,413 +41,395 @@
         </div>
 
         <nav class="p-4 space-y-1.5 flex-1">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all">
+            <button id="nav-booking" onclick="switchView('booking')" class="w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                <span>Booking</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 font-medium rounded-xl hover:bg-slate-50 transition-all cursor-not-allowed opacity-70">
-                <i data-lucide="package" class="w-5 h-5"></i>
-                <div class="flex-1 flex items-center justify-between">
-                    <span>Special Order Part</span>
-                    <span class="text-[10px] bg-slate-100 text-slate-500 font-normal px-2 py-0.5 rounded-full">Soon</span>
-                </div>
-            </a>
+                <span>Booking Analytics</span>
+            </button>
+            <button id="nav-sop" onclick="switchView('sop')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl transition-all">
+                <i data-lucide="package-check" class="w-5 h-5"></i>
+                <span>Special Order Part</span>
+            </button>
         </nav>
-
-        <div class="p-4 border-t border-slate-100">
-            <div class="bg-slate-50 p-3 rounded-xl flex items-center gap-3 text-xs text-slate-500">
-                <i data-lucide="info" class="w-4 h-4 text-slate-400 shrink-0"></i>
-                <span>Live CSV Auto-Sync Enabled</span>
-            </div>
-        </div>
     </aside>
 
-    <!-- HEADER DASHBOARD UTAMA -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3 sm:gap-4">
                 <button onclick="toggleSidebar()" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors focus:outline-none">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
                 <div>
-                    <h1 class="text-base sm:text-xl font-bold text-slate-900 leading-tight">Astrido Karawang Aftersales Dashboard</h1>
-                    <p class="text-xs text-slate-500">Aftersales Monitoring Analytics</p>
+                    <h1 id="page-title" class="text-base sm:text-xl font-bold text-slate-900 leading-tight">Astrido Karawang Booking Analytics</h1>
+                    <p id="page-subtitle" class="text-xs text-slate-500">Monitoring Kedatangan & Performance Booking MRA</p>
                 </div>
             </div>
-            <button onclick="fetchData()" class="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-colors">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i>
-                <span class="hidden sm:inline">Refresh Data</span>
-            </button>
+            <div class="flex items-center gap-3">
+                <span id="last-sync-tag" class="text-xs text-slate-400 italic hidden sm:inline">Sync Active</span>
+                <button onclick="fetchBookingData()" class="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-colors">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i>
+                    <span class="hidden sm:inline">Refresh Data</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- FILTER BAR -->
-        <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-            <div class="flex items-center gap-2 text-slate-700 font-semibold text-sm">
-                <i data-lucide="filter" class="w-4 h-4 text-red-600"></i>
-                <span>Filter Analytics:</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 items-center flex-1 md:justify-end">
-                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-                    <label class="text-xs text-slate-500 whitespace-nowrap">Rentang Service:</label>
-                    <input type="date" id="startDate" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
-                    <span class="text-xs text-slate-400">-</span>
-                    <input type="date" id="endDate" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <div id="view-booking" class="space-y-6">
+            <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                <div class="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                    <i data-lucide="filter" class="w-4 h-4 text-red-600"></i>
+                    <span>Filter Analytics:</span>
                 </div>
-                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-                    <label class="text-xs text-slate-500 whitespace-nowrap">Nama MRA:</label>
-                    <select id="filterMra" onchange="applyFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none w-full">
-                        <option value="ALL">Semua MRA</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <!-- 6 KPI CARDS SUMMARY -->
-        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-            <div onclick="openModal('TOTAL BOOKING')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">TOTAL BOOKING</span>
-                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 items-center flex-1 md:justify-end">
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                        <label class="text-xs text-slate-500 whitespace-nowrap">Rentang Service:</label>
+                        <input type="date" id="startDate" onchange="applyBookingFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
+                        <span class="text-xs text-slate-400">-</span>
+                        <input type="date" id="endDate" onchange="applyBookingFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none">
                     </div>
-                </div>
-                <div id="kpiTotalBooking" class="text-xl sm:text-2xl font-bold text-slate-900">-</div>
-                <span class="text-[10px] text-blue-600 font-medium">Klik detail data &rarr;</span>
-            </div>
-
-            <div onclick="openModal('TOTAL DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">TOTAL DATANG</span>
-                    <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div id="kpiTotalDatang" class="text-xl sm:text-2xl font-bold text-emerald-600">-</div>
-                <span class="text-[10px] text-emerald-600 font-medium">Klik detail data &rarr;</span>
-            </div>
-
-            <div onclick="openModal('TIDAK DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">TIDAK DATANG</span>
-                    <div class="p-1.5 bg-rose-50 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="x-circle" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div id="kpiTidakDatang" class="text-xl sm:text-2xl font-bold text-rose-600">-</div>
-                <span class="text-[10px] text-rose-600 font-medium">Klik detail data &rarr;</span>
-            </div>
-
-            <div onclick="openModal('BELUM DATANG')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">BELUM DATANG</span>
-                    <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div id="kpiBelumDatang" class="text-xl sm:text-2xl font-bold text-amber-600">-</div>
-                <span class="text-[10px] text-amber-600 font-medium">Klik detail data &rarr;</span>
-            </div>
-
-            <div onclick="openModal('SHOW RATE (%)')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">SHOW RATE</span>
-                    <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="trending-up" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div id="kpiShowRate" class="text-xl sm:text-2xl font-bold text-indigo-600">-%</div>
-                <span class="text-[10px] text-indigo-600 font-medium">Klik detail data &rarr;</span>
-            </div>
-
-            <div onclick="openModal('ACTIVE MRA')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500">ACTIVE MRA</span>
-                    <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="users" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div id="kpiActiveMra" class="text-xl sm:text-2xl font-bold text-purple-600">-</div>
-                <span class="text-[10px] text-purple-600 font-medium">Klik rangkuman MRA &rarr;</span>
-            </div>
-        </section>
-
-        <!-- CHARTS SECTION -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- TREND CHART DENGAN CONTROL HARIAN/MINGGUAN/BULANAN -->
-            <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-sm">Trend Kedatangan Service</h3>
-                        <p class="text-xs text-slate-400">Berdasarkan Service Tanggal</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <select id="trendGranularity" onchange="renderTrendChart()" class="bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-2.5 py-1.5 focus:outline-none cursor-pointer">
-                            <option value="daily" selected>Harian</option>
-                            <option value="weekly">Mingguan</option>
-                            <option value="monthly">Bulanan</option>
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                        <label class="text-xs text-slate-500 whitespace-nowrap">Nama MRA:</label>
+                        <select id="filterMra" onchange="applyBookingFilters()" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none w-full">
+                            <option value="ALL">Semua MRA</option>
                         </select>
-                        <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="line-chart" class="w-4 h-4"></i></span>
                     </div>
                 </div>
-                <div class="relative flex-1 min-h-[260px]">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
+            </section>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="flex items-center justify-between mb-4">
+            <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <div onclick="openBookingModal('TOTAL BOOKING')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">TOTAL BOOKING</span>
+                        <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="calendar" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiTotalBooking" class="text-xl sm:text-2xl font-bold text-slate-900">-</div>
+                    <span class="text-[10px] text-blue-600 font-medium">Klik detail data &rarr;</span>
+                </div>
+
+                <div onclick="openBookingModal('TOTAL DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">TOTAL DATANG</span>
+                        <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiTotalDatang" class="text-xl sm:text-2xl font-bold text-emerald-600">-</div>
+                    <span class="text-[10px] text-emerald-600 font-medium">Klik detail data &rarr;</span>
+                </div>
+
+                <div onclick="openBookingModal('TIDAK DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">TIDAK DATANG</span>
+                        <div class="p-1.5 bg-rose-50 text-rose-600 rounded-lg"><i data-lucide="x-circle" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiTidakDatang" class="text-xl sm:text-2xl font-bold text-rose-600">-</div>
+                    <span class="text-[10px] text-rose-600 font-medium">Klik detail data &rarr;</span>
+                </div>
+
+                <div onclick="openBookingModal('BELUM DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">BELUM DATANG</span>
+                        <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiBelumDatang" class="text-xl sm:text-2xl font-bold text-amber-600">-</div>
+                    <span class="text-[10px] text-amber-600 font-medium">Klik detail data &rarr;</span>
+                </div>
+
+                <div onclick="openBookingModal('SHOW RATE')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">SHOW RATE</span>
+                        <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="trending-up" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiShowRate" class="text-xl sm:text-2xl font-bold text-indigo-600">-%</div>
+                    <span class="text-[10px] text-indigo-600 font-medium">Klik detail data &rarr;</span>
+                </div>
+
+                <div onclick="openBookingModal('ACTIVE MRA')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">ACTIVE MRA</span>
+                        <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="users" class="w-4 h-4"></i></div>
+                    </div>
+                    <div id="kpiActiveMra" class="text-xl sm:text-2xl font-bold text-purple-600">-</div>
+                    <span class="text-[10px] text-purple-600 font-medium">Klik rangkuman &rarr;</span>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Trend Kedatangan Service</h3>
+                            <p class="text-xs text-slate-400">Berdasarkan Service Tanggal</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="trendGranularity" onchange="renderTrendChart()" class="bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-2.5 py-1.5 focus:outline-none cursor-pointer">
+                                <option value="daily" selected>Harian</option>
+                                <option value="weekly">Mingguan</option>
+                                <option value="monthly">Bulanan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 min-h-[280px]">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Top Sumber Data Booking</h3>
+                            <p class="text-xs text-slate-400">Jumlah Booking berdasarkan Media</p>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 min-h-[280px]">
+                        <canvas id="sumberDataChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm">Top Sumber Data Booking</h3>
-                        <p class="text-xs text-slate-400">Jumlah Booking berdasarkan Media/Sumber Data</p>
+                        <h3 class="font-bold text-slate-800 text-base">Leaderboard Performance MRA</h3>
+                        <p class="text-xs text-slate-400">Klik angka pada tabel untuk melihat rincian Nopol & Tanggal Service</p>
                     </div>
-                    <span class="p-2 bg-slate-50 text-slate-400 rounded-lg"><i data-lucide="bar-chart-horizontal" class="w-4 h-4"></i></span>
+                    <div class="p-2 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="trophy" class="w-5 h-5"></i></div>
                 </div>
-                <div class="relative flex-1 min-h-[260px]">
-                    <canvas id="sumberDataChart"></canvas>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-100">
+                            <tr>
+                                <th class="py-3.5 px-4 text-center">Rank</th>
+                                <th class="py-3.5 px-4">Nama MRA</th>
+                                <th class="py-3.5 px-4 text-center">Total Booking</th>
+                                <th class="py-3.5 px-4 text-center">Datang</th>
+                                <th class="py-3.5 px-4 text-center">Tidak Datang</th>
+                                <th class="py-3.5 px-4 text-center">Belum Datang</th>
+                                <th class="py-3.5 px-4 text-center">Show Rate (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mraTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+                    </table>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
-        <!-- LEADERBOARD PERFORMANCE MRA -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-base">Leaderboard Performance MRA</h3>
-                    <p class="text-xs text-slate-400">Performa pencapaian kedatangan service berdasarkan MRA</p>
+        <div id="view-sop" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center">
+                <div class="p-4 bg-red-50 text-red-600 rounded-2xl mb-4">
+                    <i data-lucide="package-check" class="w-10 h-10"></i>
                 </div>
-                <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
-                    <i data-lucide="trophy" class="w-5 h-5"></i>
+                <h3 class="text-lg font-bold text-slate-900">Special Order Part Analytics</h3>
+                <p class="text-xs text-slate-500 max-w-md mt-1 mb-4">Menu pemesanan suku cadang khusus (*Special Order Part*) siap digunakan.</p>
+                <div class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold">
+                    Status: Fitur Aktif & Siap Dihubungkan ke Source Data
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-100">
-                        <tr>
-                            <th class="py-3.5 px-4 text-center">Rank</th>
-                            <th class="py-3.5 px-4">Nama MRA</th>
-                            <th class="py-3.5 px-4 text-center">Total Booking</th>
-                            <th class="py-3.5 px-4 text-center">Datang</th>
-                            <th class="py-3.5 px-4 text-center">Tidak Datang</th>
-                            <th class="py-3.5 px-4 text-center">Belum Datang</th>
-                            <th class="py-3.5 px-4 text-center">Show Rate (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mraTableBody" class="divide-y divide-slate-100 font-medium">
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        </div>
 
     </main>
 
-    <!-- POPUP MODAL DETAIL DATA KPI -->
-    <div id="kpiModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div id="bookingModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <div>
-                    <h3 id="modalTitle" class="font-bold text-slate-900 text-base">Detail Data KPI</h3>
-                    <p id="modalSubtitle" class="text-xs text-slate-500">Daftar transaksi unit booking</p>
+                    <h3 id="bookingModalTitle" class="font-bold text-slate-900 text-base">Detail Data Booking</h3>
+                    <p id="bookingModalSubtitle" class="text-xs text-slate-500">Daftar transaksi unit booking</p>
                 </div>
-                <button onclick="closeModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors">
+                <button onclick="closeBookingModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-
             <div class="p-4 sm:p-5 flex-1 overflow-y-auto">
                 <div class="rounded-xl border border-slate-200 overflow-x-auto max-h-[60vh] relative">
                     <table class="w-full text-left text-xs border-collapse">
-                        <thead id="modalTableHeader" class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-20 shadow-sm">
-                        </thead>
-                        <tbody id="modalTableBody" class="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
-                        </tbody>
+                        <thead id="bookingModalTableHeader" class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-20 shadow-sm"></thead>
+                        <tbody id="bookingModalTableBody" class="divide-y divide-slate-100 font-medium text-slate-700 bg-white"></tbody>
                     </table>
                 </div>
             </div>
-
             <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-xs text-slate-500">
-                <span id="modalRecordCount">Total: 0 Record</span>
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-900 transition-colors">Tutup</button>
+                <span id="bookingModalRecordCount">Total: 0 Record</span>
+                <button onclick="closeBookingModal()" class="px-4 py-2 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-900 transition-colors">Tutup</button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC DYNAMIS & OTOMATIS -->
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgLQ8hj-ab5ZOJu31Z1d2gyWxeYNxl4BXHjXYZSq9eaAAnURBkcv61joIaU0Qpj-7G-eQ-yV2uGAIz/pub?gid=0&single=true&output=csv';
+        const CSV_BOOKING_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgLQ8hj-ab5ZOJu31Z1d2gyWxeYNxl4BXHjXYZSq9eaAAnURBkcv61joIaU0Qpj-7G-eQ-yV2uGAIz/pub?gid=0&single=true&output=csv';
 
-        let rawData = [];
-        let filteredData = [];
-        let chartInstances = {};
+        let rawBookingData = [], filteredBookingData = [];
+        let trendChartInstance = null, sumberChartInstance = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            fetchData();
+            fetchBookingData();
         });
 
+        // FUNGSI PERPINDAHAN MENU (BOOKING ANALYTICS VS SPECIAL ORDER PART)
+        function switchView(viewName) {
+            const bookingView = document.getElementById('view-booking');
+            const sopView = document.getElementById('view-sop');
+            const navBooking = document.getElementById('nav-booking');
+            const navSop = document.getElementById('nav-sop');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+
+            if (viewName === 'booking') {
+                bookingView.classList.remove('hidden');
+                sopView.classList.add('hidden');
+                
+                navBooking.className = "w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all";
+                navSop.className = "w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl transition-all";
+                
+                pageTitle.textContent = "Astrido Karawang Booking Analytics";
+                pageSubtitle.textContent = "Monitoring Kedatangan & Performance Booking MRA";
+            } else {
+                bookingView.classList.add('hidden');
+                sopView.classList.remove('hidden');
+                
+                navSop.className = "w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all";
+                navBooking.className = "w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl transition-all";
+                
+                pageTitle.textContent = "Astrido Karawang Special Order Part";
+                pageSubtitle.textContent = "Monitoring Pesanan Suku Cadang Khusus";
+            }
+
+            toggleSidebar(); // Otomatis menutup sidebar setelah menu dipilih
+        }
+
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        function fetchData() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            if(refreshIcon) refreshIcon.classList.add('animate-spin');
-
-            const dynamicUrl = `${CSV_URL}&_t=${new Date().getTime()}`;
-
-            Papa.parse(dynamicUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
-                    rawData = processRawData(results.data);
-                    
-                    populateMraFilterOptions();
-                    initDateRangeFilter();
-                    
-                    applyFilters();
-                },
-                error: function(err) {
-                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
-                    console.error("Gagal membaca CSV:", err);
+        function getVal(row, keys) {
+            if (!row) return '';
+            const rowKeys = Object.keys(row);
+            for (let key of keys) {
+                const found = rowKeys.find(k => k.trim().toLowerCase() === key.toLowerCase());
+                if (found && row[found] !== undefined && row[found] !== null) {
+                    return String(row[found]).trim();
                 }
-            });
-        }
-
-        function processRawData(data) {
-            return data.map(row => {
-                const nopol = row['Nomor Polisi'] || '-';
-                const sumber = row['Sumber Data'] || 'Lainnya';
-                const tglService = row['Service Tanggal'] || '-';
-                const mra = (row['Nama MRA'] || 'Unassigned').trim();
-                const caiVal = (row['CAI'] || '').trim().toUpperCase();
-
-                let status = 'BELUM DATANG';
-                if (caiVal === 'DATANG') {
-                    status = 'DATANG';
-                } else if (caiVal === 'TIDAK DATANG') {
-                    status = 'TIDAK DATANG';
-                }
-
-                return {
-                    nopol,
-                    sumber,
-                    tglService,
-                    mra: mra !== '' ? mra : 'Unassigned',
-                    status
-                };
-            });
-        }
-
-        function populateMraFilterOptions() {
-            const filterMra = document.getElementById('filterMra');
-            const currentSelected = filterMra.value;
-
-            const mraList = [...new Set(rawData.map(item => item.mra))]
-                .filter(m => m !== 'Unassigned' && m !== '-' && m !== '')
-                .sort();
-            
-            filterMra.innerHTML = '<option value="ALL">Semua MRA</option>';
-            mraList.forEach(mra => {
-                const opt = document.createElement('option');
-                opt.value = mra;
-                opt.textContent = mra;
-                filterMra.appendChild(opt);
-            });
-
-            if (mraList.includes(currentSelected)) {
-                filterMra.value = currentSelected;
             }
-        }
-
-        function initDateRangeFilter() {
-            const startInput = document.getElementById('startDate');
-            const endInput = document.getElementById('endDate');
-
-            if (startInput.value || endInput.value) return;
-
-            const validDates = rawData
-                .map(item => parseDate(item.tglService))
-                .filter(d => d !== null);
-
-            if (validDates.length > 0) {
-                const minDate = new Date(Math.min(...validDates));
-                const maxDate = new Date(Math.max(...validDates));
-
-                startInput.value = minDate.toISOString().split('T')[0];
-                endInput.value = maxDate.toISOString().split('T')[0];
-            }
-        }
-
-        function applyFilters() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const selectedMra = document.getElementById('filterMra').value;
-
-            filteredData = rawData.filter(item => {
-                if (selectedMra !== 'ALL' && item.mra !== selectedMra) {
-                    return false;
-                }
-
-                if (startDate || endDate) {
-                    const itemDate = parseDate(item.tglService);
-                    if (itemDate) {
-                        if (startDate && itemDate < new Date(startDate)) return false;
-                        if (endDate) {
-                            const eDate = new Date(endDate);
-                            eDate.setHours(23, 59, 59, 999);
-                            if (itemDate > eDate) return false;
-                        }
-                    }
-                }
-                return true;
-            });
-
-            updateKPIs();
-            renderCharts();
-            renderMraLeaderboard();
+            return '';
         }
 
         function parseDate(dateStr) {
-            if (!dateStr || dateStr === '-') return null;
-
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-                const day = parseInt(parts[0].trim(), 10);
-                const monthStr = parts[1].trim();
-                let year = parseInt(parts[2].trim(), 10);
+            if (!dateStr || dateStr === '-' || dateStr === 'N/A') return null;
+            let cleaned = String(dateStr).trim().replace(/\s+/g, ' ');
+            const parts = cleaned.split(/[-/\s]+/);
+            
+            if (parts.length >= 3) {
+                const day = parseInt(parts[0], 10);
+                const monthStr = parts[1].toLowerCase();
+                let year = parseInt(parts[2], 10);
                 if (year < 100) year += 2000;
 
                 const months = {
                     jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5,
                     jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11
                 };
-                
-                const month = months[monthStr.toLowerCase()];
-                if (month !== undefined) {
-                    return new Date(year, month, day);
+
+                if (months[monthStr] !== undefined && !isNaN(day) && !isNaN(year)) {
+                    return new Date(year, months[monthStr], day);
                 }
             }
-            
-            const parsed = new Date(dateStr);
-            return isNaN(parsed) ? null : parsed;
+            const d = new Date(cleaned);
+            return isNaN(d.getTime()) ? null : d;
         }
 
-        function updateKPIs() {
-            const totalBooking = filteredData.length;
-            const totalDatang = filteredData.filter(d => d.status === 'DATANG').length;
-            const tidakDatang = filteredData.filter(d => d.status === 'TIDAK DATANG').length;
-            const belumDatang = filteredData.filter(d => d.status === 'BELUM DATANG').length;
-            const showRate = totalBooking > 0 ? ((totalDatang / totalBooking) * 100).toFixed(1) : 0;
+        function fetchBookingData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if(refreshIcon) refreshIcon.classList.add('animate-spin');
+
+            Papa.parse(`${CSV_BOOKING_URL}&_t=${Date.now()}`, {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+                    rawBookingData = processBookingData(results.data);
+                    populateBookingMraFilterOptions();
+                    applyBookingFilters();
+                    updateSyncTag();
+                },
+                error: function() {
+                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+                }
+            });
+        }
+
+        function processBookingData(data) {
+            return data.map(row => {
+                const nopol = getVal(row, ['Nomor Polisi', 'No Polisi', 'No Pol', 'Nopol']) || '-';
+                const sumber = getVal(row, ['Sumber Data', 'Sumber', 'Media']) || 'Lainnya';
+                const tglService = getVal(row, ['Service Tanggal', 'Tgl Service', 'Tanggal Service', 'Tanggal']) || '-';
+                const mraVal = getVal(row, ['Nama MRA', 'MRA', 'Nama Mra']);
+                const mra = mraVal !== '' ? mraVal : 'Unassigned';
+                
+                const caiVal = getVal(row, ['CAI', 'Status Kedatangan', 'Status']).toUpperCase();
+
+                let status = 'BELUM DATANG';
+                if (caiVal.includes('BELUM')) {
+                    status = 'BELUM DATANG';
+                } else if (caiVal.includes('TIDAK') || caiVal.includes('CANCEL') || caiVal.includes('BATAL')) {
+                    status = 'TIDAK DATANG';
+                } else if (caiVal.includes('DATANG') || caiVal.includes('DATAN') || caiVal === 'SBE' || caiVal === 'GRP') {
+                    status = 'DATANG';
+                }
+
+                return { nopol, sumber, tglService, mra, status };
+            });
+        }
+
+        function populateBookingMraFilterOptions() {
+            const filterMra = document.getElementById('filterMra');
+            const currentSelected = filterMra.value;
+            const mraList = [...new Set(rawBookingData.map(item => item.mra))]
+                .filter(m => m !== 'Unassigned' && m !== '-' && m !== '')
+                .sort();
             
-            const activeMras = new Set(filteredData.map(d => d.mra).filter(m => m !== 'Unassigned' && m !== '-' && m !== '')).size;
+            filterMra.innerHTML = '<option value="ALL">Semua MRA</option>';
+            mraList.forEach(mra => {
+                const opt = document.createElement('option');
+                opt.value = mra; opt.textContent = mra;
+                filterMra.appendChild(opt);
+            });
+            if (mraList.includes(currentSelected)) filterMra.value = currentSelected;
+        }
+
+        function applyBookingFilters() {
+            const startDateVal = document.getElementById('startDate').value;
+            const endDateVal = document.getElementById('endDate').value;
+            const selectedMra = document.getElementById('filterMra').value;
+
+            const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
+            const endLimit = endDateVal ? new Date(endDateVal + 'T23:59:59') : null;
+
+            filteredBookingData = rawBookingData.filter(item => {
+                if (selectedMra !== 'ALL' && item.mra !== selectedMra) return false;
+                
+                if (startLimit || endLimit) {
+                    const itemDate = parseDate(item.tglService);
+                    if (itemDate) {
+                        if (startLimit && itemDate < startLimit) return false;
+                        if (endLimit && itemDate > endLimit) return false;
+                    }
+                }
+                return true;
+            });
+
+            updateBookingKPIs();
+            renderTrendChart();
+            renderSumberDataChart();
+            renderMraLeaderboard();
+        }
+
+        function updateBookingKPIs() {
+            const totalBooking = filteredBookingData.length;
+            const totalDatang = filteredBookingData.filter(d => d.status === 'DATANG').length;
+            const tidakDatang = filteredBookingData.filter(d => d.status === 'TIDAK DATANG').length;
+            const belumDatang = filteredBookingData.filter(d => d.status === 'BELUM DATANG').length;
+            const showRate = totalBooking > 0 ? ((totalDatang / totalBooking) * 100).toFixed(1) : 0;
+            const activeMras = new Set(filteredBookingData.map(d => d.mra).filter(m => m !== 'Unassigned' && m !== '-' && m !== '')).size;
 
             document.getElementById('kpiTotalBooking').textContent = totalBooking.toLocaleString('id-ID');
             document.getElementById('kpiTotalDatang').textContent = totalDatang.toLocaleString('id-ID');
@@ -468,97 +439,55 @@
             document.getElementById('kpiActiveMra').textContent = activeMras;
         }
 
-        function renderCharts() {
-            renderTrendChart();
-            renderSumberDataChart();
-        }
-
         function renderTrendChart() {
             const granularity = document.getElementById('trendGranularity')?.value || 'daily';
-            const startInput = document.getElementById('startDate').value;
-            const endInput = document.getElementById('endDate').value;
+            const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-            let start = startInput ? new Date(startInput) : null;
-            let end = endInput ? new Date(endInput) : null;
+            const groupMap = {};
 
-            if (!start || !end) {
-                const validDates = filteredData
-                    .map(item => parseDate(item.tglService))
-                    .filter(d => d !== null);
+            filteredBookingData.forEach(item => {
+                const pDate = parseDate(item.tglService);
+                if (!pDate) return;
 
-                if (validDates.length > 0) {
-                    if (!start) start = new Date(Math.min(...validDates));
-                    if (!end) end = new Date(Math.max(...validDates));
-                }
-            }
+                let groupKey = '';
+                let displayLabel = '';
 
-            if (!start || !end) return;
-
-            function getKeyAndLabel(dateObj) {
-                const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                
                 if (granularity === 'monthly') {
-                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-                    const label = `${monthsShort[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
-                    return { key, label };
-                } 
-                else if (granularity === 'weekly') {
-                    const d = new Date(dateObj);
+                    groupKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
+                    displayLabel = `${monthsShort[pDate.getMonth()]} ${pDate.getFullYear()}`;
+                } else if (granularity === 'weekly') {
+                    const d = new Date(pDate.getTime());
                     const day = d.getDay();
                     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
                     const monday = new Date(d.setDate(diff));
-                    
-                    const dayStr = String(monday.getDate()).padStart(2, '0');
-                    const monthStr = monthsShort[monday.getMonth()];
-                    const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
-                    const label = `Minggu ${dayStr} ${monthStr}`;
-                    return { key, label };
-                } 
-                else { // daily
-                    const dayStr = String(dateObj.getDate()).padStart(2, '0');
-                    const monthStr = monthsShort[dateObj.getMonth()];
-                    const yearStr = dateObj.getFullYear().toString().slice(-2);
-                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dayStr}`;
-                    const label = `${dayStr}-${monthStr}-${yearStr}`;
-                    return { key, label };
+                    groupKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+                    displayLabel = `Minggu (${String(monday.getDate()).padStart(2, '0')} ${monthsShort[monday.getMonth()]})`;
+                } else {
+                    groupKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}-${String(pDate.getDate()).padStart(2, '0')}`;
+                    displayLabel = `${String(pDate.getDate()).padStart(2, '0')} ${monthsShort[pDate.getMonth()]}`;
                 }
-            }
 
-            const datesMap = {};
-            const keyToLabelMap = {};
-            let current = new Date(start);
-
-            while (current <= end) {
-                const { key, label } = getKeyAndLabel(current);
-                if (!datesMap[key]) {
-                    datesMap[key] = { DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
-                    keyToLabelMap[key] = label;
+                if (!groupMap[groupKey]) {
+                    groupMap[groupKey] = { label: displayLabel, DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
                 }
-                current.setDate(current.getDate() + 1);
-            }
 
-            filteredData.forEach(item => {
-                const pDate = parseDate(item.tglService);
-                if (pDate) {
-                    const { key } = getKeyAndLabel(pDate);
-                    if (datesMap[key]) {
-                        if (datesMap[key][item.status] !== undefined) {
-                            datesMap[key][item.status]++;
-                        }
-                    }
+                if (groupMap[groupKey][item.status] !== undefined) {
+                    groupMap[groupKey][item.status]++;
                 }
             });
 
-            const sortedKeys = Object.keys(datesMap).sort();
-            const labels = sortedKeys.map(k => keyToLabelMap[k]);
-            const datangData = sortedKeys.map(k => datesMap[k].DATANG);
-            const tidakDatangData = sortedKeys.map(k => datesMap[k]['TIDAK DATANG']);
-            const belumDatangData = sortedKeys.map(k => datesMap[k]['BELUM DATANG']);
+            const sortedKeys = Object.keys(groupMap).sort();
+            const labels = sortedKeys.map(k => groupMap[k].label);
+            const datangData = sortedKeys.map(k => groupMap[k].DATANG);
+            const tidakDatangData = sortedKeys.map(k => groupMap[k]['TIDAK DATANG']);
+            const belumDatangData = sortedKeys.map(k => groupMap[k]['BELUM DATANG']);
 
-            if (chartInstances.trendChart) chartInstances.trendChart.destroy();
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
 
             const ctx = document.getElementById('trendChart').getContext('2d');
-            chartInstances.trendChart = new Chart(ctx, {
+            trendChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels,
@@ -572,58 +501,41 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { beginAtZero: true, ticks: { font: { size: 10 }, precision: 0 } }
-                    }
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } }
                 }
             });
         }
 
         function renderSumberDataChart() {
             const counts = {};
-            filteredData.forEach(item => {
-                counts[item.sumber] = (counts[item.sumber] || 0) + 1;
-            });
-
+            filteredBookingData.forEach(item => { counts[item.sumber] = (counts[item.sumber] || 0) + 1; });
             const sortedKeys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0, 7);
             const dataVals = sortedKeys.map(k => counts[k]);
 
-            if (chartInstances.sumberDataChart) chartInstances.sumberDataChart.destroy();
+            if (sumberChartInstance) {
+                sumberChartInstance.destroy();
+            }
 
             const ctx = document.getElementById('sumberDataChart').getContext('2d');
-            chartInstances.sumberDataChart = new Chart(ctx, {
+            sumberChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: sortedKeys,
-                    datasets: [{
-                        label: 'Total Booking',
-                        data: dataVals,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 6
-                    }]
+                    datasets: [{ label: 'Total Booking', data: dataVals, backgroundColor: '#3b82f6', borderRadius: 6 }]
                 },
                 options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: {
-                        x: { beginAtZero: true, ticks: { font: { size: 10 }, precision: 0 } },
-                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                    }
+                    scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } }
                 }
             });
         }
 
         function renderMraLeaderboard() {
             const mraStats = {};
-
-            filteredData.forEach(item => {
+            filteredBookingData.forEach(item => {
                 const name = item.mra;
-                if (!mraStats[name]) {
-                    mraStats[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
-                }
+                if (!mraStats[name]) mraStats[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
                 mraStats[name].total++;
                 if (item.status === 'DATANG') mraStats[name].datang++;
                 else if (item.status === 'TIDAK DATANG') mraStats[name].tidak++;
@@ -647,101 +559,38 @@
 
             sortedMra.forEach((mra, index) => {
                 let badgeClass = 'bg-red-50 text-red-600 border-red-200';
-                if (mra.showRate > 60) {
-                    badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
-                } else if (mra.showRate >= 40) {
-                    badgeClass = 'bg-amber-50 text-amber-600 border-amber-200';
-                }
+                if (mra.showRate > 60) badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                else if (mra.showRate >= 40) badgeClass = 'bg-amber-50 text-amber-600 border-amber-200';
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.className = "hover:bg-slate-50 transition-colors";
                 tr.innerHTML = `
                     <td class="py-3 px-4 text-center">
-                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-amber-100 text-amber-700' : index === 1 ? 'bg-slate-200 text-slate-700' : index === 2 ? 'bg-amber-800/10 text-amber-800' : 'text-slate-500'}">
-                            ${index + 1}
-                        </span>
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-amber-100 text-amber-700' : index === 1 ? 'bg-slate-200 text-slate-700' : index === 2 ? 'bg-amber-800/10 text-amber-800' : 'text-slate-500'}">${index + 1}</span>
                     </td>
                     <td class="py-3 px-4 font-bold text-slate-800">${mra.name}</td>
-                    <td class="py-3 px-4 text-center font-semibold text-slate-700">${mra.total}</td>
-                    <td class="py-3 px-4 text-center text-emerald-600 font-semibold">${mra.datang}</td>
-                    <td class="py-3 px-4 text-center text-rose-600">${mra.tidak}</td>
-                    <td class="py-3 px-4 text-center text-amber-600">${mra.belum}</td>
-                    <td class="py-3 px-4 text-center">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${badgeClass}">
-                            ${mra.showRate}%
-                        </span>
-                    </td>
+                    <td class="py-3 px-4 text-center font-bold text-blue-600 hover:underline cursor-pointer" onclick="openMraModal('${mra.name}', 'ALL')">${mra.total}</td>
+                    <td class="py-3 px-4 text-center text-emerald-600 font-bold hover:underline cursor-pointer" onclick="openMraModal('${mra.name}', 'DATANG')">${mra.datang}</td>
+                    <td class="py-3 px-4 text-center text-rose-600 font-bold hover:underline cursor-pointer" onclick="openMraModal('${mra.name}', 'TIDAK DATANG')">${mra.tidak}</td>
+                    <td class="py-3 px-4 text-center text-amber-600 font-bold hover:underline cursor-pointer" onclick="openMraModal('${mra.name}', 'BELUM DATANG')">${mra.belum}</td>
+                    <td class="py-3 px-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold border ${badgeClass}">${mra.showRate}%</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function openModal(cardType) {
-            const modal = document.getElementById('kpiModal');
-            const title = document.getElementById('modalTitle');
-            const subtitle = document.getElementById('modalSubtitle');
-            const thead = document.getElementById('modalTableHeader');
-            const tbody = document.getElementById('modalTableBody');
-            const countText = document.getElementById('modalRecordCount');
-
-            title.textContent = `Detail Data: ${cardType}`;
-            subtitle.textContent = `Menampilkan rincian daftar unit berdasarkan kriteria ${cardType}`;
-
-            let dataToDisplay = [];
-            let isMraSummaryMode = false;
-
-            if (cardType === 'TOTAL BOOKING') {
-                dataToDisplay = filteredData;
-            } else if (cardType === 'TOTAL DATANG') {
-                dataToDisplay = filteredData.filter(d => d.status === 'DATANG');
-            } else if (cardType === 'TIDAK DATANG') {
-                dataToDisplay = filteredData.filter(d => d.status === 'TIDAK DATANG');
-            } else if (cardType === 'BELUM DATANG') {
-                dataToDisplay = filteredData.filter(d => d.status === 'BELUM DATANG');
-            } else if (cardType === 'SHOW RATE (%)') {
-                dataToDisplay = filteredData;
-            } else if (cardType === 'ACTIVE MRA') {
-                isMraSummaryMode = true;
+        function openMraModal(mraName, statusType) {
+            let list = filteredBookingData.filter(d => d.mra === mraName);
+            if (statusType !== 'ALL') {
+                list = list.filter(d => d.status === statusType);
             }
+            openBookingModalCustom(`Detail MRA: ${mraName} (${statusType})`, `Menampilkan rincian nopol unit untuk MRA ${mraName}`, list);
+        }
 
-            if (!isMraSummaryMode) {
-                thead.innerHTML = `
-                    <tr>
-                        <th class="py-3 px-4 text-left">Nomor Polisi</th>
-                        <th class="py-3 px-4 text-left">Service Tanggal</th>
-                        <th class="py-3 px-4 text-left">Nama MRA</th>
-                    </tr>
-                `;
-
-                tbody.innerHTML = '';
-                if (dataToDisplay.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">Tidak ada data unit.</td></tr>`;
-                } else {
-                    dataToDisplay.forEach(item => {
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50 transition-colors";
-                        tr.innerHTML = `
-                            <td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td>
-                            <td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td>
-                            <td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-                countText.textContent = `Total: ${dataToDisplay.length} Unit Booking`;
-            } else {
-                thead.innerHTML = `
-                    <tr>
-                        <th class="py-3 px-4 text-left">Nama MRA</th>
-                        <th class="py-3 px-4 text-center">Total Unit Handled</th>
-                        <th class="py-3 px-4 text-center">Datang</th>
-                        <th class="py-3 px-4 text-center">Tidak Datang</th>
-                        <th class="py-3 px-4 text-center">Belum Datang</th>
-                    </tr>
-                `;
-
+        function openBookingModal(type) {
+            if (type === 'ACTIVE MRA') {
                 const mraMap = {};
-                filteredData.forEach(item => {
+                filteredBookingData.forEach(item => {
                     const name = item.mra;
                     if (!mraMap[name]) mraMap[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
                     mraMap[name].total++;
@@ -750,29 +599,77 @@
                     else mraMap[name].belum++;
                 });
 
+                document.getElementById('bookingModalTitle').textContent = 'Detail KPI: ACTIVE MRA';
+                document.getElementById('bookingModalSubtitle').textContent = 'Rangkuman Performa MRA';
+                
+                const thead = document.getElementById('bookingModalTableHeader');
+                const tbody = document.getElementById('bookingModalTableBody');
+
+                thead.innerHTML = `<tr><th class="py-3 px-4 text-left">Nama MRA</th><th class="py-3 px-4 text-center">Total Booking</th><th class="py-3 px-4 text-center">Datang</th><th class="py-3 px-4 text-center">Tidak Datang</th><th class="py-3 px-4 text-center">Belum Datang</th></tr>`;
                 tbody.innerHTML = '';
-                const mraList = Object.keys(mraMap);
-                mraList.forEach(mraName => {
-                    const stat = mraMap[mraName];
+
+                Object.keys(mraMap).forEach(name => {
+                    const st = mraMap[name];
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `<td class="py-2.5 px-4 font-bold text-slate-800">${name}</td><td class="py-2.5 px-4 text-center font-bold text-slate-900">${st.total}</td><td class="py-2.5 px-4 text-center text-emerald-600 font-semibold">${st.datang}</td><td class="py-2.5 px-4 text-center text-rose-600 font-semibold">${st.tidak}</td><td class="py-2.5 px-4 text-center text-amber-600 font-semibold">${st.belum}</td>`;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('bookingModalRecordCount').textContent = `Total: ${Object.keys(mraMap).length} MRA`;
+                document.getElementById('bookingModal').classList.remove('hidden');
+                return;
+            }
+
+            let list = filteredBookingData;
+            if (type === 'TOTAL DATANG') list = filteredBookingData.filter(d => d.status === 'DATANG');
+            else if (type === 'TIDAK DATANG') list = filteredBookingData.filter(d => d.status === 'TIDAK DATANG');
+            else if (type === 'BELUM DATANG') list = filteredBookingData.filter(d => d.status === 'BELUM DATANG');
+
+            openBookingModalCustom(`Detail KPI: ${type}`, `Menampilkan daftar rincian kendaraan (${type})`, list);
+        }
+
+        function openBookingModalCustom(title, subtitle, list) {
+            document.getElementById('bookingModalTitle').textContent = title;
+            document.getElementById('bookingModalSubtitle').textContent = subtitle;
+            
+            const thead = document.getElementById('bookingModalTableHeader');
+            const tbody = document.getElementById('bookingModalTableBody');
+
+            thead.innerHTML = `<tr><th class="py-3 px-4 text-left">Nomor Polisi</th><th class="py-3 px-4 text-left">Tanggal Service</th><th class="py-3 px-4 text-left">Status Kedatangan</th><th class="py-3 px-4 text-left">MRA</th><th class="py-3 px-4 text-left">Sumber Data</th></tr>`;
+            tbody.innerHTML = '';
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Tidak ada data unit ditemukan.</td></tr>`;
+            } else {
+                list.forEach(item => {
+                    let badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
+                    if (item.status === 'DATANG') badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                    else if (item.status === 'TIDAK DATANG') badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 transition-colors";
                     tr.innerHTML = `
-                        <td class="py-2.5 px-4 font-bold text-slate-800">${mraName}</td>
-                        <td class="py-2.5 px-4 text-center font-bold text-slate-900">${stat.total}</td>
-                        <td class="py-2.5 px-4 text-center text-emerald-600 font-semibold">${stat.datang}</td>
-                        <td class="py-2.5 px-4 text-center text-rose-600 font-semibold">${stat.tidak}</td>
-                        <td class="py-2.5 px-4 text-center text-amber-600 font-semibold">${stat.belum}</td>
+                        <td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td>
+                        <td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td>
+                        <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
+                        <td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td>
+                        <td class="py-2.5 px-4 text-slate-500">${item.sumber}</td>
                     `;
                     tbody.appendChild(tr);
                 });
-                countText.textContent = `Total: ${mraList.length} Personel MRA Aktif`;
             }
-
-            modal.classList.remove('hidden');
+            document.getElementById('bookingModalRecordCount').textContent = `Total: ${list.length} Record`;
+            document.getElementById('bookingModal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('kpiModal').classList.add('hidden');
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+        }
+
+        function updateSyncTag() {
+            const el = document.getElementById('last-sync-tag');
+            if(el) el.innerText = `Sync: ${new Date().toLocaleTimeString()}`;
         }
     </script>
 </body>
