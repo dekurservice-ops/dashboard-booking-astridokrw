@@ -18,12 +18,15 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .kpi-card { transition: all 0.2s ease-in-out; cursor: pointer; }
         .kpi-card:hover { transform: translateY(-3px); }
+        .chart-container { position: relative; height: 260px; width: 100%; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
+    <!-- SIDEBAR OVERLAY -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
+    <!-- SIDEBAR -->
     <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
         <div class="p-5 border-b border-slate-100 flex flex-col gap-3 relative">
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
@@ -52,6 +55,7 @@
         </nav>
     </aside>
 
+    <!-- HEADER -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3 sm:gap-4">
@@ -64,8 +68,9 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping hidden sm:block"></span>
                 <span id="last-sync-tag" class="text-xs text-slate-400 italic hidden sm:inline">Sync Active</span>
-                <button onclick="fetchBookingData()" class="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-colors">
+                <button onclick="fetchAllData()" class="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-colors">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refreshIcon"></i>
                     <span class="hidden sm:inline">Refresh Data</span>
                 </button>
@@ -75,6 +80,9 @@
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
+        <!-- ========================================== -->
+        <!-- VIEW 1: BOOKING ANALYTICS -->
+        <!-- ========================================== -->
         <div id="view-booking" class="space-y-6">
             <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <div class="flex items-center gap-2 text-slate-700 font-semibold text-sm">
@@ -98,58 +106,52 @@
             </section>
 
             <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-                <div onclick="openBookingModal('TOTAL BOOKING')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">TOTAL BOOKING</span>
+                <div onclick="openBookingModal('TOTAL BOOKING')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-slate-500">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Total Booking</span>
                         <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="calendar" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiTotalBooking" class="text-xl sm:text-2xl font-bold text-slate-900">-</div>
-                    <span class="text-[10px] text-blue-600 font-medium">Klik detail data &rarr;</span>
+                    <h3 id="kpiTotalBooking" class="text-2xl font-bold mt-2 text-slate-900">-</h3>
                 </div>
 
-                <div onclick="openBookingModal('TOTAL DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">TOTAL DATANG</span>
+                <div onclick="openBookingModal('TOTAL DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-emerald-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Total Datang</span>
                         <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiTotalDatang" class="text-xl sm:text-2xl font-bold text-emerald-600">-</div>
-                    <span class="text-[10px] text-emerald-600 font-medium">Klik detail data &rarr;</span>
+                    <h3 id="kpiTotalDatang" class="text-2xl font-bold mt-2 text-emerald-600">-</h3>
                 </div>
 
-                <div onclick="openBookingModal('TIDAK DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">TIDAK DATANG</span>
+                <div onclick="openBookingModal('TIDAK DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-rose-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Tidak Datang</span>
                         <div class="p-1.5 bg-rose-50 text-rose-600 rounded-lg"><i data-lucide="x-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiTidakDatang" class="text-xl sm:text-2xl font-bold text-rose-600">-</div>
-                    <span class="text-[10px] text-rose-600 font-medium">Klik detail data &rarr;</span>
+                    <h3 id="kpiTidakDatang" class="text-2xl font-bold mt-2 text-rose-600">-</h3>
                 </div>
 
-                <div onclick="openBookingModal('BELUM DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">BELUM DATANG</span>
+                <div onclick="openBookingModal('BELUM DATANG')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-amber-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Belum Datang</span>
                         <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiBelumDatang" class="text-xl sm:text-2xl font-bold text-amber-600">-</div>
-                    <span class="text-[10px] text-amber-600 font-medium">Klik detail data &rarr;</span>
+                    <h3 id="kpiBelumDatang" class="text-2xl font-bold mt-2 text-amber-600">-</h3>
                 </div>
 
-                <div onclick="openBookingModal('SHOW RATE')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">SHOW RATE</span>
+                <div onclick="openBookingModal('SHOW RATE')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-indigo-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Show Rate</span>
                         <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="trending-up" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiShowRate" class="text-xl sm:text-2xl font-bold text-indigo-600">-%</div>
-                    <span class="text-[10px] text-indigo-600 font-medium">Klik detail data &rarr;</span>
+                    <h3 id="kpiShowRate" class="text-2xl font-bold mt-2 text-indigo-600">-%</h3>
                 </div>
 
-                <div onclick="openBookingModal('ACTIVE MRA')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-slate-500">ACTIVE MRA</span>
-                        <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="users" class="w-4 h-4"></i></div>
+                <div onclick="openBookingModal('BOOKING ON CALL')" class="kpi-card bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-sm text-white">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Booking On Call</span>
+                        <div class="p-1.5 bg-white/10 rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
                     </div>
-                    <div id="kpiActiveMra" class="text-xl sm:text-2xl font-bold text-purple-600">-</div>
-                    <span class="text-[10px] text-purple-600 font-medium">Klik rangkuman &rarr;</span>
+                    <h3 id="kpiBookingOnCall" class="text-2xl font-bold mt-2 text-white">-</h3>
                 </div>
             </section>
 
@@ -186,6 +188,19 @@
                 </div>
             </section>
 
+            <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Analisa Booking On Call (BOC) Per MRA</h3>
+                        <p class="text-xs text-slate-400">Distribusi jumlah Booking On Call berdasarkan masing-masing MRA</p>
+                    </div>
+                    <div class="p-2 bg-slate-100 text-slate-700 rounded-xl"><i data-lucide="bar-chart" class="w-4 h-4"></i></div>
+                </div>
+                <div class="relative min-h-[260px]">
+                    <canvas id="bocPerMraChart"></canvas>
+                </div>
+            </section>
+
             <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                     <div>
@@ -213,21 +228,161 @@
             </section>
         </div>
 
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: SPECIAL ORDER PART (SOP) -->
+        <!-- ========================================== -->
         <div id="view-sop" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center">
-                <div class="p-4 bg-red-50 text-red-600 rounded-2xl mb-4">
-                    <i data-lucide="package-check" class="w-10 h-10"></i>
+            <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <div onclick="openSopKPIModal('', 'Semua Order Part')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between text-slate-500">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Total Order</span>
+                        <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-total" class="text-2xl font-bold mt-2">0</h3>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">Special Order Part Analytics</h3>
-                <p class="text-xs text-slate-500 max-w-md mt-1 mb-4">Menu pemesanan suku cadang khusus (*Special Order Part*) siap digunakan.</p>
-                <div class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold">
-                    Status: Fitur Aktif & Siap Dihubungkan ke Source Data
+
+                <div onclick="openSopKPIModal('B/O', 'Order Part Backorder (B/O)')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between text-red-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Backorder</span>
+                        <div class="p-1.5 bg-red-50 text-red-600 rounded-lg"><i data-lucide="alert-circle" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-bo" class="text-2xl font-bold mt-2">0</h3>
                 </div>
-            </div>
+
+                <div onclick="openSopKPIModal('Konfirmasi Jadwal', 'Order Tunggu Konfirmasi')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between text-amber-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Konfirmasi</span>
+                        <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="help-circle" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-konfirmasi" class="text-2xl font-bold mt-2">0</h3>
+                </div>
+
+                <div onclick="openSopKPIModal('Tunggu Pemasangan', 'Order Tunggu Pasang')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between text-blue-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Ready Pasang</span>
+                        <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-pasang" class="text-2xl font-bold mt-2">0</h3>
+                </div>
+
+                <div onclick="openSopKPIModal('Terpasang', 'Order Part Terpasang')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between text-emerald-600">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Terpasang</span>
+                        <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-terpasang" class="text-2xl font-bold mt-2">0</h3>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-2xl shadow-sm text-white">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">% Selesai</span>
+                        <div class="p-1.5 bg-white/10 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
+                    </div>
+                    <h3 id="sop-kpi-pct" class="text-2xl font-bold mt-2">0%</h3>
+                    <div class="w-full bg-white/10 rounded-full h-1 mt-2">
+                        <div id="sop-kpi-bar" class="bg-emerald-400 h-1 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Pencarian</label>
+                    <input type="text" id="sop-search" placeholder="No Pol / Part..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-xs font-semibold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Service Advisor</label>
+                    <select id="sop-filter-sa" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"></select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Status</label>
+                    <select id="sop-filter-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+                        <option value="">Semua Status</option>
+                        <option value="B/O">B/O</option>
+                        <option value="Konfirmasi Jadwal">Konfirmasi Jadwal</option>
+                        <option value="Tunggu Pemasangan">Tunggu Pemasangan</option>
+                        <option value="Terpasang">Terpasang</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Mulai Tgl Order</label>
+                    <input type="date" id="sop-filter-start" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Sampai Tgl Order</label>
+                    <input type="date" id="sop-filter-end" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2 flex flex-col">
+                    <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 mb-4 uppercase">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600"></i> Top 10 Nomor Part Terorder
+                    </h3>
+                    <div class="chart-container flex-1"><canvas id="sopTopPartChart"></canvas></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                    <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 mb-1 uppercase">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i> Analisa Suplai Ratio
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 my-4 bg-slate-50 p-3 rounded-xl border border-slate-100 text-[10px]">
+                        <div><span class="text-slate-400 font-bold block uppercase">Total Order:</span> <span id="sop-stat-total" class="font-bold text-slate-900 text-sm">0</span></div>
+                        <div><span class="text-slate-400 font-bold block uppercase">Part Tiba:</span> <span id="sop-stat-suplai" class="font-bold text-emerald-600 text-sm">0</span></div>
+                        <div><span class="text-slate-400 font-bold block uppercase">Total BO:</span> <span id="sop-stat-total-bo" class="font-bold text-red-600 text-sm">0</span></div>
+                        <div><span class="text-slate-400 font-bold block uppercase">BO Tiba:</span> <span id="sop-stat-bo-suplai" class="font-bold text-indigo-600 text-sm">0</span></div>
+                    </div>
+                    <div class="chart-container flex-1" style="max-height: 160px;"><canvas id="sopSupplyRatioChart"></canvas></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 lg:col-span-3 flex flex-col">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 uppercase">
+                                <i data-lucide="timer" class="w-4 h-4 text-indigo-600"></i> Lead Time Suplai (> 3 Hari)
+                            </h3>
+                            <p class="text-[11px] text-slate-400 font-medium italic">Menampilkan Nomor Order (Code) dengan durasi suplai di atas 3 hari.</p>
+                        </div>
+                        <div class="flex gap-3 text-center">
+                            <div class="bg-slate-50 border px-3 py-1 rounded-xl"><span class="text-[9px] font-bold text-slate-400 uppercase block">Rata-rata</span><span id="sop-avg-lt" class="text-sm font-bold text-indigo-600">0d</span></div>
+                            <div class="bg-red-50 border border-red-100 px-3 py-1 rounded-xl"><span class="text-[9px] font-bold text-red-400 uppercase block">Terlama</span><span id="sop-max-lt" class="text-sm font-bold text-red-600">0d</span></div>
+                        </div>
+                    </div>
+                    <div class="chart-container flex-1" style="max-height: 240px;"><canvas id="sopLeadTimeChart"></canvas></div>
+                </div>
+            </section>
+
+            <!-- MAIN BOARD DATA SOP DENGAN FREEZE HEADER & TANPA TAMPILAN LIST PART -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm uppercase tracking-tight">Main Board Data SOP (Grouped by Code)</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Klik baris tabel untuk melihat rincian Part, Nama & Qty</p>
+                    </div>
+                    <span id="sop-data-count" class="text-xs font-bold bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full">0 Records</span>
+                </div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar relative">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="sticky top-0 bg-slate-100 text-slate-700 font-bold uppercase text-[9px] tracking-wider z-20 shadow-sm border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 bg-slate-100">Code</th>
+                                <th class="px-6 py-4 bg-slate-100">SA</th>
+                                <th class="px-6 py-4 bg-slate-100">No Kendaraan</th>
+                                <th class="px-6 py-4 bg-slate-100">Tgl Order</th>
+                                <th class="px-6 py-4 bg-slate-100">Status</th>
+                                <th class="px-6 py-4 text-center bg-slate-100">Aksi / Rincian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sop-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
     </main>
 
+    <!-- MODALS -->
     <div id="bookingModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -254,18 +409,56 @@
         </div>
     </div>
 
+    <div id="sopKpiModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 id="sopKpiModalTitle" class="text-base font-bold text-slate-900 uppercase">Detail Data SOP</h3>
+                <button onclick="closeSopKPIModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[9px] sticky top-0 border-b border-slate-200 z-10">
+                        <tr><th class="px-4 py-3">Code</th><th class="px-4 py-3">SA</th><th class="px-4 py-3">No Kendaraan</th><th class="px-4 py-3">Status</th></tr>
+                    </thead>
+                    <tbody id="sopKpiModalTableBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="sopDetailModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6 border-b pb-4">
+                    <h3 class="text-lg font-bold text-slate-900 uppercase tracking-tight">Rincian Order SOP</h3>
+                    <button onclick="closeSopDetailModal()" class="text-slate-300 hover:text-red-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div id="sopModalContent" class="space-y-4"></div>
+                <button onclick="closeSopDetailModal()" class="w-full mt-8 bg-slate-900 text-white py-3 rounded-2xl font-bold text-xs hover:bg-slate-800 transition-all uppercase">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
     <script>
         const CSV_BOOKING_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRgLQ8hj-ab5ZOJu31Z1d2gyWxeYNxl4BXHjXYZSq9eaAAnURBkcv61joIaU0Qpj-7G-eQ-yV2uGAIz/pub?gid=0&single=true&output=csv';
+        const CSV_SOP_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIDLFkByyO5KJDw2vLnF2kxcj1lSoDEeN_Hw9fnYOEnmXvuZuzynN1ncnaGsudHALaj-DR0nzMHB0j/pub?gid=0&single=true&output=csv';
 
         let rawBookingData = [], filteredBookingData = [];
-        let trendChartInstance = null, sumberChartInstance = null;
+        let trendChartInstance = null, sumberChartInstance = null, bocPerMraChartInstance = null;
+        
+        let rawSopData = [], groupedSopData = [], filteredSopData = [], sopCharts = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            fetchBookingData();
+            fetchAllData();
+            setInterval(fetchAllData, 30000);
+
+            ['sop-search', 'sop-filter-sa', 'sop-filter-status', 'sop-filter-start', 'sop-filter-end'].forEach(id => {
+                document.getElementById(id).addEventListener('input', applySopFilters);
+            });
         });
 
-        // FUNGSI PERPINDAHAN MENU (BOOKING ANALYTICS VS SPECIAL ORDER PART)
         function switchView(viewName) {
             const bookingView = document.getElementById('view-booking');
             const sopView = document.getElementById('view-sop');
@@ -277,24 +470,19 @@
             if (viewName === 'booking') {
                 bookingView.classList.remove('hidden');
                 sopView.classList.add('hidden');
-                
                 navBooking.className = "w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all";
                 navSop.className = "w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl transition-all";
-                
                 pageTitle.textContent = "Astrido Karawang Booking Analytics";
                 pageSubtitle.textContent = "Monitoring Kedatangan & Performance Booking MRA";
             } else {
                 bookingView.classList.add('hidden');
                 sopView.classList.remove('hidden');
-                
                 navSop.className = "w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl transition-all";
                 navBooking.className = "w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl transition-all";
-                
                 pageTitle.textContent = "Astrido Karawang Special Order Part";
                 pageSubtitle.textContent = "Monitoring Pesanan Suku Cadang Khusus";
             }
-
-            toggleSidebar(); // Otomatis menutup sidebar setelah menu dipilih
+            toggleSidebar();
         }
 
         function toggleSidebar() {
@@ -302,6 +490,44 @@
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
+        function fetchAllData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if(refreshIcon) refreshIcon.classList.add('animate-spin');
+            
+            Promise.all([
+                new Promise(resolve => {
+                    Papa.parse(`${CSV_BOOKING_URL}&_t=${Date.now()}`, {
+                        download: true, header: true, skipEmptyLines: true,
+                        complete: function(results) {
+                            rawBookingData = processBookingData(results.data);
+                            populateBookingMraFilterOptions();
+                            applyBookingFilters();
+                            resolve();
+                        }
+                    });
+                }),
+                new Promise(resolve => {
+                    Papa.parse(`${CSV_SOP_URL}&_t=${Date.now()}`, {
+                        download: true, header: true, skipEmptyLines: true,
+                        complete: function(results) {
+                            rawSopData = results.data;
+                            groupedSopData = groupSopByCode(rawSopData);
+                            populateSopSAFilter();
+                            applySopFilters();
+                            resolve();
+                        }
+                    });
+                })
+            ]).then(() => {
+                if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+                const el = document.getElementById('last-sync-tag');
+                if(el) el.innerText = `Sync: ${new Date().toLocaleTimeString()}`;
+            }).catch(() => {
+                if(refreshIcon) refreshIcon.classList.remove('animate-spin');
+            });
+        }
+
+        // ================= BOOKING LOGIC =================
         function getVal(row, keys) {
             if (!row) return '';
             const rowKeys = Object.keys(row);
@@ -318,18 +544,12 @@
             if (!dateStr || dateStr === '-' || dateStr === 'N/A') return null;
             let cleaned = String(dateStr).trim().replace(/\s+/g, ' ');
             const parts = cleaned.split(/[-/\s]+/);
-            
             if (parts.length >= 3) {
                 const day = parseInt(parts[0], 10);
                 const monthStr = parts[1].toLowerCase();
                 let year = parseInt(parts[2], 10);
                 if (year < 100) year += 2000;
-
-                const months = {
-                    jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5,
-                    jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11
-                };
-
+                const months = { jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5, jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11 };
                 if (months[monthStr] !== undefined && !isNaN(day) && !isNaN(year)) {
                     return new Date(year, months[monthStr], day);
                 }
@@ -338,55 +558,29 @@
             return isNaN(d.getTime()) ? null : d;
         }
 
-        function fetchBookingData() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            if(refreshIcon) refreshIcon.classList.add('animate-spin');
-
-            Papa.parse(`${CSV_BOOKING_URL}&_t=${Date.now()}`, {
-                download: true, header: true, skipEmptyLines: true,
-                complete: function(results) {
-                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
-                    rawBookingData = processBookingData(results.data);
-                    populateBookingMraFilterOptions();
-                    applyBookingFilters();
-                    updateSyncTag();
-                },
-                error: function() {
-                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
-                }
-            });
-        }
-
         function processBookingData(data) {
             return data.map(row => {
                 const nopol = getVal(row, ['Nomor Polisi', 'No Polisi', 'No Pol', 'Nopol']) || '-';
                 const sumber = getVal(row, ['Sumber Data', 'Sumber', 'Media']) || 'Lainnya';
                 const tglService = getVal(row, ['Service Tanggal', 'Tgl Service', 'Tanggal Service', 'Tanggal']) || '-';
+                const tglBoc = getVal(row, ['Tanggal BOC', 'Tgl BOC', 'BOC']) || '';
                 const mraVal = getVal(row, ['Nama MRA', 'MRA', 'Nama Mra']);
                 const mra = mraVal !== '' ? mraVal : 'Unassigned';
-                
                 const caiVal = getVal(row, ['CAI', 'Status Kedatangan', 'Status']).toUpperCase();
 
                 let status = 'BELUM DATANG';
-                if (caiVal.includes('BELUM')) {
-                    status = 'BELUM DATANG';
-                } else if (caiVal.includes('TIDAK') || caiVal.includes('CANCEL') || caiVal.includes('BATAL')) {
-                    status = 'TIDAK DATANG';
-                } else if (caiVal.includes('DATANG') || caiVal.includes('DATAN') || caiVal === 'SBE' || caiVal === 'GRP') {
-                    status = 'DATANG';
-                }
+                if (caiVal.includes('BELUM')) status = 'BELUM DATANG';
+                else if (caiVal.includes('TIDAK') || caiVal.includes('CANCEL') || caiVal.includes('BATAL')) status = 'TIDAK DATANG';
+                else if (caiVal.includes('DATANG') || caiVal.includes('DATAN') || caiVal === 'SBE' || caiVal === 'GRP') status = 'DATANG';
 
-                return { nopol, sumber, tglService, mra, status };
+                return { nopol, sumber, tglService, tglBoc, mra, status };
             });
         }
 
         function populateBookingMraFilterOptions() {
             const filterMra = document.getElementById('filterMra');
             const currentSelected = filterMra.value;
-            const mraList = [...new Set(rawBookingData.map(item => item.mra))]
-                .filter(m => m !== 'Unassigned' && m !== '-' && m !== '')
-                .sort();
-            
+            const mraList = [...new Set(rawBookingData.map(item => item.mra))].filter(m => m !== 'Unassigned' && m !== '-' && m !== '').sort();
             filterMra.innerHTML = '<option value="ALL">Semua MRA</option>';
             mraList.forEach(mra => {
                 const opt = document.createElement('option');
@@ -397,6 +591,14 @@
         }
 
         function applyBookingFilters() {
+            updateBookingKPIs();
+            renderTrendChart();
+            renderSumberDataChart();
+            renderBocPerMraChart();
+            renderMraLeaderboard();
+        }
+
+        function updateBookingKPIs() {
             const startDateVal = document.getElementById('startDate').value;
             const endDateVal = document.getElementById('endDate').value;
             const selectedMra = document.getElementById('filterMra').value;
@@ -404,9 +606,8 @@
             const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
             const endLimit = endDateVal ? new Date(endDateVal + 'T23:59:59') : null;
 
-            filteredBookingData = rawBookingData.filter(item => {
+            const filteredGeneral = rawBookingData.filter(item => {
                 if (selectedMra !== 'ALL' && item.mra !== selectedMra) return false;
-                
                 if (startLimit || endLimit) {
                     const itemDate = parseDate(item.tglService);
                     if (itemDate) {
@@ -417,41 +618,50 @@
                 return true;
             });
 
-            updateBookingKPIs();
-            renderTrendChart();
-            renderSumberDataChart();
-            renderMraLeaderboard();
-        }
+            filteredBookingData = filteredGeneral;
 
-        function updateBookingKPIs() {
-            const totalBooking = filteredBookingData.length;
-            const totalDatang = filteredBookingData.filter(d => d.status === 'DATANG').length;
-            const tidakDatang = filteredBookingData.filter(d => d.status === 'TIDAK DATANG').length;
-            const belumDatang = filteredBookingData.filter(d => d.status === 'BELUM DATANG').length;
+            const totalBooking = filteredGeneral.length;
+            const totalDatang = filteredGeneral.filter(d => d.status === 'DATANG').length;
+            const tidakDatang = filteredGeneral.filter(d => d.status === 'TIDAK DATANG').length;
+            const belumDatang = filteredGeneral.filter(d => d.status === 'BELUM DATANG').length;
             const showRate = totalBooking > 0 ? ((totalDatang / totalBooking) * 100).toFixed(1) : 0;
-            const activeMras = new Set(filteredBookingData.map(d => d.mra).filter(m => m !== 'Unassigned' && m !== '-' && m !== '')).size;
+            
+            const bookingOnCallCount = rawBookingData.filter(item => {
+                if (selectedMra !== 'ALL' && item.mra !== selectedMra) return false;
+                const bocStr = String(item.tglBoc || '').trim();
+                const isValidBoc = bocStr !== '' && bocStr !== '-' && bocStr.toLowerCase() !== 'undefined' && bocStr.toLowerCase() !== 'null';
+                if (!isValidBoc) return false;
+
+                if (startLimit || endLimit) {
+                    const bocDate = parseDate(item.tglBoc);
+                    if (bocDate) {
+                        if (startLimit && bocDate < startLimit) return false;
+                        if (endLimit && bocDate > endLimit) return false;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }).length;
 
             document.getElementById('kpiTotalBooking').textContent = totalBooking.toLocaleString('id-ID');
             document.getElementById('kpiTotalDatang').textContent = totalDatang.toLocaleString('id-ID');
             document.getElementById('kpiTidakDatang').textContent = tidakDatang.toLocaleString('id-ID');
             document.getElementById('kpiBelumDatang').textContent = belumDatang.toLocaleString('id-ID');
             document.getElementById('kpiShowRate').textContent = `${showRate}%`;
-            document.getElementById('kpiActiveMra').textContent = activeMras;
+            document.getElementById('kpiBookingOnCall').textContent = bookingOnCallCount.toLocaleString('id-ID');
         }
 
         function renderTrendChart() {
             const granularity = document.getElementById('trendGranularity')?.value || 'daily';
             const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
             const groupMap = {};
 
             filteredBookingData.forEach(item => {
                 const pDate = parseDate(item.tglService);
                 if (!pDate) return;
 
-                let groupKey = '';
-                let displayLabel = '';
-
+                let groupKey = '', displayLabel = '';
                 if (granularity === 'monthly') {
                     groupKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
                     displayLabel = `${monthsShort[pDate.getMonth()]} ${pDate.getFullYear()}`;
@@ -470,10 +680,7 @@
                 if (!groupMap[groupKey]) {
                     groupMap[groupKey] = { label: displayLabel, DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
                 }
-
-                if (groupMap[groupKey][item.status] !== undefined) {
-                    groupMap[groupKey][item.status]++;
-                }
+                if (groupMap[groupKey][item.status] !== undefined) groupMap[groupKey][item.status]++;
             });
 
             const sortedKeys = Object.keys(groupMap).sort();
@@ -482,9 +689,7 @@
             const tidakDatangData = sortedKeys.map(k => groupMap[k]['TIDAK DATANG']);
             const belumDatangData = sortedKeys.map(k => groupMap[k]['BELUM DATANG']);
 
-            if (trendChartInstance) {
-                trendChartInstance.destroy();
-            }
+            if (trendChartInstance) trendChartInstance.destroy();
 
             const ctx = document.getElementById('trendChart').getContext('2d');
             trendChartInstance = new Chart(ctx, {
@@ -498,8 +703,7 @@
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
                     scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } }
                 }
@@ -512,21 +716,71 @@
             const sortedKeys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0, 7);
             const dataVals = sortedKeys.map(k => counts[k]);
 
-            if (sumberChartInstance) {
-                sumberChartInstance.destroy();
-            }
+            if (sumberChartInstance) sumberChartInstance.destroy();
 
             const ctx = document.getElementById('sumberDataChart').getContext('2d');
             sumberChartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: sortedKeys,
-                    datasets: [{ label: 'Total Booking', data: dataVals, backgroundColor: '#3b82f6', borderRadius: 6 }]
-                },
+                data: { labels: sortedKeys, datasets: [{ label: 'Total Booking', data: dataVals, backgroundColor: '#3b82f6', borderRadius: 6 }] },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } }
+                }
+            });
+        }
+
+        function renderBocPerMraChart() {
+            const startDateVal = document.getElementById('startDate').value;
+            const endDateVal = document.getElementById('endDate').value;
+            const selectedMra = document.getElementById('filterMra').value;
+            const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
+            const endLimit = endDateVal ? new Date(endDateVal + 'T23:59:59') : null;
+
+            const bocCounts = {};
+            rawBookingData.forEach(item => {
+                if (selectedMra !== 'ALL' && item.mra !== selectedMra) return;
+                const bocStr = String(item.tglBoc || '').trim();
+                const isValidBoc = bocStr !== '' && bocStr !== '-' && bocStr.toLowerCase() !== 'undefined' && bocStr.toLowerCase() !== 'null';
+                if (!isValidBoc) return;
+
+                if (startLimit || endLimit) {
+                    const bocDate = parseDate(item.tglBoc);
+                    if (bocDate) {
+                        if (startLimit && bocDate < startLimit) return;
+                        if (endLimit && bocDate > endLimit) return;
+                    } else {
+                        return;
+                    }
+                }
+
+                const mraName = item.mra;
+                if (mraName && mraName !== '-' && mraName !== 'Unassigned') {
+                    bocCounts[mraName] = (bocCounts[mraName] || 0) + 1;
+                }
+            });
+
+            const sortedMras = Object.keys(bocCounts).sort((a,b) => bocCounts[b] - bocCounts[a]);
+            const counts = sortedMras.map(m => bocCounts[m]);
+
+            if (bocPerMraChartInstance) bocPerMraChartInstance.destroy();
+
+            const ctx = document.getElementById('bocPerMraChart').getContext('2d');
+            bocPerMraChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedMras,
+                    datasets: [{
+                        label: 'Jumlah Booking On Call (BOC)',
+                        data: counts,
+                        backgroundColor: '#0f172a',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } }
                 }
             });
         }
@@ -581,42 +835,53 @@
 
         function openMraModal(mraName, statusType) {
             let list = filteredBookingData.filter(d => d.mra === mraName);
-            if (statusType !== 'ALL') {
-                list = list.filter(d => d.status === statusType);
-            }
+            if (statusType !== 'ALL') list = list.filter(d => d.status === statusType);
             openBookingModalCustom(`Detail MRA: ${mraName} (${statusType})`, `Menampilkan rincian nopol unit untuk MRA ${mraName}`, list);
         }
 
         function openBookingModal(type) {
-            if (type === 'ACTIVE MRA') {
-                const mraMap = {};
-                filteredBookingData.forEach(item => {
-                    const name = item.mra;
-                    if (!mraMap[name]) mraMap[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
-                    mraMap[name].total++;
-                    if (item.status === 'DATANG') mraMap[name].datang++;
-                    else if (item.status === 'TIDAK DATANG') mraMap[name].tidak++;
-                    else mraMap[name].belum++;
+            if (type === 'BOOKING ON CALL') {
+                const startDateVal = document.getElementById('startDate').value;
+                const endDateVal = document.getElementById('endDate').value;
+                const selectedMra = document.getElementById('filterMra').value;
+                const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
+                const endLimit = endDateVal ? new Date(endDateVal + 'T23:59:59') : null;
+
+                const listBoc = rawBookingData.filter(item => {
+                    if (selectedMra !== 'ALL' && item.mra !== selectedMra) return false;
+                    const bocStr = String(item.tglBoc || '').trim();
+                    const isValidBoc = bocStr !== '' && bocStr !== '-' && bocStr.toLowerCase() !== 'undefined' && bocStr.toLowerCase() !== 'null';
+                    if (!isValidBoc) return false;
+
+                    if (startLimit || endLimit) {
+                        const bocDate = parseDate(item.tglBoc);
+                        if (bocDate) {
+                            if (startLimit && bocDate < startLimit) return false;
+                            if (endLimit && bocDate > endLimit) return false;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return true;
                 });
 
-                document.getElementById('bookingModalTitle').textContent = 'Detail KPI: ACTIVE MRA';
-                document.getElementById('bookingModalSubtitle').textContent = 'Rangkuman Performa MRA';
-                
+                document.getElementById('bookingModalTitle').textContent = 'Detail KPI: BOOKING ON CALL (BOC)';
+                document.getElementById('bookingModalSubtitle').textContent = 'Daftar transaksi berdasarkan Tanggal BOC & Rentang Filter';
                 const thead = document.getElementById('bookingModalTableHeader');
                 const tbody = document.getElementById('bookingModalTableBody');
-
-                thead.innerHTML = `<tr><th class="py-3 px-4 text-left">Nama MRA</th><th class="py-3 px-4 text-center">Total Booking</th><th class="py-3 px-4 text-center">Datang</th><th class="py-3 px-4 text-center">Tidak Datang</th><th class="py-3 px-4 text-center">Belum Datang</th></tr>`;
+                thead.innerHTML = `<tr><th class="py-3 px-4 text-left">Nomor Polisi</th><th class="py-3 px-4 text-left">Tanggal BOC</th><th class="py-3 px-4 text-left">Tanggal Service</th><th class="py-3 px-4 text-left">MRA</th><th class="py-3 px-4 text-left">Sumber Data</th></tr>`;
                 tbody.innerHTML = '';
-
-                Object.keys(mraMap).forEach(name => {
-                    const st = mraMap[name];
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors";
-                    tr.innerHTML = `<td class="py-2.5 px-4 font-bold text-slate-800">${name}</td><td class="py-2.5 px-4 text-center font-bold text-slate-900">${st.total}</td><td class="py-2.5 px-4 text-center text-emerald-600 font-semibold">${st.datang}</td><td class="py-2.5 px-4 text-center text-rose-600 font-semibold">${st.tidak}</td><td class="py-2.5 px-4 text-center text-amber-600 font-semibold">${st.belum}</td>`;
-                    tbody.appendChild(tr);
-                });
-
-                document.getElementById('bookingModalRecordCount').textContent = `Total: ${Object.keys(mraMap).length} MRA`;
+                if (listBoc.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Tidak ada data unit ditemukan.</td></tr>`;
+                } else {
+                    listBoc.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `<td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td><td class="py-2.5 px-4 font-semibold text-indigo-600">${item.tglBoc}</td><td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td><td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td><td class="py-2.5 px-4 text-slate-500">${item.sumber}</td>`;
+                        tbody.appendChild(tr);
+                    });
+                }
+                document.getElementById('bookingModalRecordCount').textContent = `Total: ${listBoc.length} Record`;
                 document.getElementById('bookingModal').classList.remove('hidden');
                 return;
             }
@@ -632,13 +897,10 @@
         function openBookingModalCustom(title, subtitle, list) {
             document.getElementById('bookingModalTitle').textContent = title;
             document.getElementById('bookingModalSubtitle').textContent = subtitle;
-            
             const thead = document.getElementById('bookingModalTableHeader');
             const tbody = document.getElementById('bookingModalTableBody');
-
             thead.innerHTML = `<tr><th class="py-3 px-4 text-left">Nomor Polisi</th><th class="py-3 px-4 text-left">Tanggal Service</th><th class="py-3 px-4 text-left">Status Kedatangan</th><th class="py-3 px-4 text-left">MRA</th><th class="py-3 px-4 text-left">Sumber Data</th></tr>`;
             tbody.innerHTML = '';
-
             if (!list || list.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Tidak ada data unit ditemukan.</td></tr>`;
             } else {
@@ -646,16 +908,9 @@
                     let badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
                     if (item.status === 'DATANG') badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
                     else if (item.status === 'TIDAK DATANG') badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
-
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 transition-colors";
-                    tr.innerHTML = `
-                        <td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td>
-                        <td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td>
-                        <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
-                        <td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td>
-                        <td class="py-2.5 px-4 text-slate-500">${item.sumber}</td>
-                    `;
+                    tr.innerHTML = `<td class="py-2.5 px-4 font-bold text-slate-900">${item.nopol}</td><td class="py-2.5 px-4 text-slate-600 font-medium">${item.tglService}</td><td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${item.status}</span></td><td class="py-2.5 px-4 font-medium text-slate-700">${item.mra}</td><td class="py-2.5 px-4 text-slate-500">${item.sumber}</td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -663,14 +918,252 @@
             document.getElementById('bookingModal').classList.remove('hidden');
         }
 
-        function closeBookingModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
+        function closeBookingModal() { document.getElementById('bookingModal').classList.add('hidden'); }
+
+
+        // ================= SPECIAL ORDER PART (SOP) LOGIC =================
+        function groupSopByCode(data) {
+            const map = {};
+            data.forEach(row => {
+                const code = (row['Code'] || '').trim();
+                if (!code) return;
+                if (!map[code]) {
+                    map[code] = {
+                        Code: code,
+                        'Nama SA': row['Nama SA'] || '',
+                        'No Kendaraan': row['No Kendaraan'] || '',
+                        'Tanggal Order': row['Tanggal Order'] || '',
+                        'Tipe Order': row['Tipe Order'] || '',
+                        'ETA B/O': row['ETA B/O'] || '',
+                        'Aktual Kedatangan': row['Aktual Kedatangan'] || '',
+                        'Tanggal Pasang': row['Tanggal Pasang'] || '',
+                        'Status Part': row['Status Part'] || '',
+                        items: []
+                    };
+                }
+                map[code].items.push({
+                    'Nomor Part': row['Nomor Part'] || '',
+                    'Nama Part': row['Nama Part'] || '',
+                    'Qty': row['Qty'] || '1'
+                });
+            });
+            return Object.values(map);
         }
 
-        function updateSyncTag() {
-            const el = document.getElementById('last-sync-tag');
-            if(el) el.innerText = `Sync: ${new Date().toLocaleTimeString()}`;
+        function populateSopSAFilter() {
+            const select = document.getElementById('sop-filter-sa');
+            const current = select.value;
+            const saList = [...new Set(groupedSopData.map(i => i['Nama SA']).filter(Boolean))].sort();
+            select.innerHTML = '<option value="">Semua SA</option>';
+            saList.forEach(sa => {
+                const opt = document.createElement('option');
+                opt.value = sa; opt.textContent = sa;
+                if(sa === current) opt.selected = true;
+                select.appendChild(opt);
+            });
         }
+
+        function parseSopDateString(str) {
+            if (!str) return null;
+            const d = new Date(str);
+            if (!isNaN(d)) return d;
+            const parts = str.split('-');
+            return parts.length === 3 ? new Date(`${parts[1]}/${parts[0]}/${parts[2]}`) : null;
+        }
+
+        function applySopFilters() {
+            const search = document.getElementById('sop-search').value.toLowerCase();
+            const sa = document.getElementById('sop-filter-sa').value;
+            const status = document.getElementById('sop-filter-status').value;
+            const start = document.getElementById('sop-filter-start').value;
+            const end = document.getElementById('sop-filter-end').value;
+
+            filteredSopData = groupedSopData.filter(i => {
+                const matchesSearch = !search || Object.values(i).some(v => String(v).toLowerCase().includes(search)) || i.items.some(item => Object.values(item).some(v => String(v).toLowerCase().includes(search)));
+                const matchesSA = !sa || i['Nama SA'] === sa;
+                const matchesStatus = !status || i['Status Part'] === status;
+                let matchesDate = true;
+                if (start || end) {
+                    const d = parseSopDateString(i['Tanggal Order']);
+                    if (d) {
+                        if (start && d < new Date(start)) matchesDate = false;
+                        if (end) { const ed = new Date(end); ed.setHours(23,59,59); if (d > ed) matchesDate = false; }
+                    }
+                }
+                return matchesSearch && matchesSA && matchesStatus && matchesDate;
+            });
+
+            filteredSopData.sort((a,b) => (parseSopDateString(b['Tanggal Order']) || 0) - (parseSopDateString(a['Tanggal Order']) || 0));
+            updateSopUI();
+        }
+
+        function updateSopUI() {
+            renderSopKPIs(); 
+            renderSopTable(); 
+            renderSopCharts();
+            document.getElementById('sop-data-count').innerText = `${filteredSopData.length} Records (Grouped)`;
+        }
+
+        function renderSopKPIs() {
+            const getLen = (st) => filteredSopData.filter(i => i['Status Part'] === st).length;
+            const counts = { 
+                total: filteredSopData.length, 
+                bo: getLen('B/O'), 
+                konf: getLen('Konfirmasi Jadwal'), 
+                pasang: getLen('Tunggu Pemasangan'), 
+                terpasang: getLen('Terpasang') 
+            };
+            
+            Object.keys(counts).forEach(k => { if(document.getElementById(`sop-kpi-${k}`)) document.getElementById(`sop-kpi-${k}`).innerText = counts[k]; });
+            const pct = counts.total > 0 ? Math.round((counts.terpasang / counts.total) * 100) : 0;
+            document.getElementById('sop-kpi-pct').innerText = `${pct}%`;
+            document.getElementById('sop-kpi-bar').style.width = `${pct}%`;
+        }
+
+        function getSopStatusColor(st) {
+            if(!st) return 'bg-slate-100 text-slate-500 border-slate-200';
+            const statusUpper = st.toUpperCase();
+            if (statusUpper.includes('B/O')) return 'bg-red-50 text-red-600 border-red-200';
+            if (statusUpper.includes('KONFIRMASI JADWAL')) return 'bg-amber-50 text-amber-600 border-amber-200';
+            if (statusUpper.includes('TUNGGU PEMASANGAN')) return 'bg-blue-50 text-blue-600 border-blue-200';
+            if (statusUpper.includes('TERPASANG')) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+            return 'bg-slate-100 text-slate-500 border-slate-200';
+        }
+
+        function renderSopTable() {
+            const tbody = document.getElementById('sop-table-body');
+            tbody.innerHTML = filteredSopData.map((i, idx) => {
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick="showSopDetail(${idx})">
+                        <td class="px-6 py-4 font-mono text-slate-700 text-[11px] font-bold">${i['Code'] || '-'}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800">${i['Nama SA'] || '-'}</td>
+                        <td class="px-6 py-4 font-bold text-indigo-600">${i['No Kendaraan'] || '-'}</td>
+                        <td class="px-6 py-4 text-slate-500">${i['Tanggal Order'] || '-'}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold border ${getSopStatusColor(i['Status Part'])}">${i['Status Part'] || '-'}</span></td>
+                        <td class="px-6 py-4 text-center text-slate-400 hover:text-indigo-600"><i data-lucide="eye" class="w-4 h-4 mx-auto"></i></td>
+                    </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function renderSopCharts() {
+            Object.values(sopCharts).forEach(c => c.destroy());
+            
+            const partMap = {};
+            filteredSopData.forEach(i => { 
+                i.items.forEach(it => {
+                    const p = (it['Nomor Part'] || '').trim(); 
+                    const q = parseInt(it['Qty']) || 1;
+                    if(p) partMap[p] = (partMap[p] || 0) + q; 
+                });
+            });
+            const top = Object.entries(partMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+            const ctxTop = document.getElementById('sopTopPartChart').getContext('2d');
+            sopCharts.top = new Chart(ctxTop, {
+                type: 'bar',
+                data: { labels: top.map(x=>x[0]), datasets: [{ data: top.map(x=>x[1]), backgroundColor: '#6366f1', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            let tiba=0, boTot=0, boTiba=0, boPend=0;
+            filteredSopData.forEach(i => {
+                const hasETA = !!i['ETA B/O']?.trim(), hasAct = !!i['Aktual Kedatangan']?.trim();
+                if(hasAct) tiba++; if(hasETA) { boTot++; hasAct ? boTiba++ : boPend++; }
+            });
+            document.getElementById('sop-stat-total').innerText = filteredSopData.length;
+            document.getElementById('sop-stat-suplai').innerText = tiba;
+            document.getElementById('sop-stat-total-bo').innerText = boTot;
+            document.getElementById('sop-stat-bo-suplai').innerText = boTiba;
+
+            const ctxRatio = document.getElementById('sopSupplyRatioChart').getContext('2d');
+            sopCharts.ratio = new Chart(ctxRatio, {
+                type: 'doughnut',
+                data: { labels: ['BO Tiba', 'BO Pending', 'Direct'], datasets: [{ data: [boTiba, boPend, Math.max(0, tiba-boTiba)], backgroundColor: ['#6366f1', '#ef4444', '#10b981'], borderWeight: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } }
+            });
+
+            let ltTot=0, ltCnt=0, ltMax=0; const ltD=[], ltL=[];
+            filteredSopData.forEach(i => {
+                const o = parseSopDateString(i['Tanggal Order']), a = parseSopDateString(i['Aktual Kedatangan']);
+                if(o && a) {
+                    const diffTime = a - o;
+                    if (diffTime >= 0) {
+                        const d = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        ltTot += d; ltCnt++; 
+                        if(d > ltMax) ltMax = d;
+                        if(d > 3) { ltD.push(d); ltL.push(i['Code'] || 'N/A'); }
+                    }
+                }
+            });
+            
+            document.getElementById('sop-avg-lt').innerText = ltCnt ? (ltTot/ltCnt).toFixed(1)+'d' : '0d';
+            document.getElementById('sop-max-lt').innerText = ltMax+'d';
+            
+            const ctxLt = document.getElementById('sopLeadTimeChart').getContext('2d');
+            sopCharts.lt = new Chart(ctxLt, {
+                type: 'bar',
+                data: { labels: ltL.slice(0,15), datasets: [{ data: ltD.slice(0,15), backgroundColor: '#ef4444', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function showSopDetail(idx) {
+            const i = filteredSopData[idx];
+            const partsListHtml = i.items.map(it => `
+                <div class="bg-white p-2.5 rounded-xl border border-slate-200 mb-2 shadow-sm">
+                    <p class="font-mono font-bold text-indigo-600 text-xs">${it['Nomor Part']}</p>
+                    <p class="text-slate-800 font-semibold text-xs mt-0.5 uppercase">${it['Nama Part']}</p>
+                    <p class="text-[10px] text-slate-500 mt-1 font-bold">Qty: <span class="text-indigo-600">${it['Qty']}</span></p>
+                </div>
+            `).join('');
+
+            document.getElementById('sopModalContent').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="col-span-2 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Code Order</p>
+                        <p class="font-mono text-indigo-600 font-bold text-sm">${i['Code'] || '-'}</p>
+                    </div>
+                    <div class="col-span-2 bg-slate-100/70 p-3 rounded-2xl max-h-48 overflow-y-auto">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-2">Daftar Suku Cadang</p>
+                        ${partsListHtml}
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Service Advisor</p>
+                        <p class="font-bold text-slate-800">${i['Nama SA'] || '-'}</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">No Polisi</p>
+                        <p class="font-bold text-indigo-600 uppercase">${i['No Kendaraan'] || '-'}</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div><p class="text-[9px] font-bold text-slate-400 uppercase">Tgl Order</p><p class="font-semibold text-slate-700">${i['Tanggal Order'] || '-'}</p></div>
+                        <div><p class="text-[9px] font-bold text-slate-400 uppercase">Tgl Pasang</p><p class="font-semibold text-slate-700">${i['Tanggal Pasang'] || '-'}</p></div>
+                    </div>
+                    <div class="space-y-3">
+                        <div><p class="text-[9px] font-bold text-slate-400 uppercase">ETA B/O</p><p class="font-bold text-red-500">${i['ETA B/O'] || '-'}</p></div>
+                        <div><p class="text-[9px] font-bold text-slate-400 uppercase">Status</p><span class="px-2 py-0.5 rounded text-[9px] font-bold border ${getSopStatusColor(i['Status Part'])}">${i['Status Part'] || '-'}</span></div>
+                    </div>
+                </div>`;
+            document.getElementById('sopDetailModal').classList.remove('hidden');
+        }
+
+        function closeSopDetailModal() { document.getElementById('sopDetailModal').classList.add('hidden'); }
+
+        function openSopKPIModal(st, title) {
+            const list = st ? filteredSopData.filter(i => i['Status Part'] === st) : filteredSopData;
+            document.getElementById('sopKpiModalTitle').innerText = title;
+            document.getElementById('sopKpiModalTableBody').innerHTML = list.map(i => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-3 font-mono text-[10px] font-bold text-slate-700">${i['Code'] || '-'}</td>
+                    <td class="px-4 py-3 font-bold text-slate-700">${i['Nama SA'] || '-'}</td>
+                    <td class="px-4 py-3 font-bold text-indigo-600">${i['No Kendaraan'] || '-'}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[9px] font-bold border ${getSopStatusColor(i['Status Part'])}">${i['Status Part'] || '-'}</span></td>
+                </tr>`).join('');
+            document.getElementById('sopKpiModal').classList.remove('hidden');
+        }
+
+        function closeSopKPIModal() { document.getElementById('sopKpiModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
