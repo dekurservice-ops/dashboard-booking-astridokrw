@@ -81,9 +81,7 @@
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        <!-- ========================================== -->
         <!-- VIEW 1: BOOKING ANALYTICS -->
-        <!-- ========================================== -->
         <div id="view-booking" class="space-y-6">
             <section class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 <div class="flex items-center gap-2 text-slate-700 font-semibold text-sm">
@@ -240,12 +238,8 @@
             </section>
         </div>
 
-
-        <!-- ========================================== -->
         <!-- VIEW 2: SPECIAL ORDER PART (SOP) -->
-        <!-- ========================================== -->
         <div id="view-sop" class="hidden space-y-6">
-            <!-- KPI CARDS SOP -->
             <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
                 <div onclick="openSopKPIModal('', 'Semua Order Part')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
                     <div class="flex items-center justify-between text-slate-500">
@@ -505,9 +499,11 @@
             const refreshIcon = document.getElementById('refreshIcon');
             if(refreshIcon) refreshIcon.classList.add('animate-spin');
             
+            const cacheBuster = `&_t=${Date.now()}`;
+
             Promise.all([
                 new Promise(resolve => {
-                    Papa.parse(`${CSV_BOOKING_URL}&_t=${Date.now()}`, {
+                    Papa.parse(CSV_BOOKING_URL + cacheBuster, {
                         download: true, header: true, skipEmptyLines: true,
                         complete: function(results) {
                             rawBookingData = processBookingData(results.data);
@@ -518,7 +514,7 @@
                     });
                 }),
                 new Promise(resolve => {
-                    Papa.parse(`${CSV_SOP_URL}&_t=${Date.now()}`, {
+                    Papa.parse(CSV_SOP_URL + cacheBuster, {
                         download: true, header: false, skipEmptyLines: true,
                         complete: function(results) {
                             rawSopMasterData = results.data;
@@ -527,7 +523,7 @@
                     });
                 }),
                 new Promise(resolve => {
-                    Papa.parse(`${CSV_DETAIL_PART_URL}&_t=${Date.now()}`, {
+                    Papa.parse(CSV_DETAIL_PART_URL + cacheBuster, {
                         download: true, header: false, skipEmptyLines: true,
                         complete: function(results) {
                             rawDetailPartData = results.data;
@@ -553,7 +549,7 @@
             if (!row) return '';
             const rowKeys = Object.keys(row);
             for (let key of keys) {
-                const found = rowKeys.find(k => k.trim().toLowerCase() === key.toLowerCase());
+                const found = rowKeys.find(k => k.trim().toLowerCase().replace(/\s+/g, '') === key.toLowerCase().replace(/\s+/g, ''));
                 if (found && row[found] !== undefined && row[found] !== null) {
                     return String(row[found]).trim();
                 }
@@ -585,14 +581,22 @@
                 const sumber = getVal(row, ['Sumber Data', 'Sumber', 'Media']) || 'Lainnya';
                 const tglService = getVal(row, ['Service Tanggal', 'Tgl Service', 'Tanggal Service', 'Tanggal']) || '-';
                 const tglBoc = getVal(row, ['Tanggal BOC', 'Tgl BOC', 'BOC']) || '';
-                const mraVal = getVal(row, ['Nama MRA', 'MRA', 'Nama Mra']);
-                const mra = mraVal !== '' ? mraVal : 'Unassigned';
+                
+                const mraVal = getVal(row, ['Nama MRA', 'MRA', 'Nama Mra', 'Nama Sales MRA', 'Sales MRA']);
+                const mra = (mraVal !== '' && mraVal !== '-') ? mraVal : 'Unassigned';
+                
                 const caiVal = getVal(row, ['CAI', 'Status Kedatangan', 'Status']).toUpperCase();
 
-                let status = 'BELUM DATANG';
-                if (caiVal.includes('BELUM')) status = 'BELUM DATANG';
-                else if (caiVal.includes('TIDAK') || caiVal.includes('CANCEL') || caiVal.includes('BATAL')) status = 'TIDAK DATANG';
-                else if (caiVal.includes('DATANG') || caiVal.includes('DATAN') || caiVal === 'SBE' || caiVal === 'GRP') status = 'DATANG';
+                let status = 'BELUM DIKONFIRMASI';
+                if (caiVal.includes('BELUM')) {
+                    status = 'BELUM DATANG';
+                } else if (caiVal.includes('TIDAK') || caiVal.includes('CANCEL') || caiVal.includes('BATAL')) {
+                    status = 'TIDAK DATANG';
+                } else if (caiVal.includes('DATANG') || caiVal.includes('DATAN') || caiVal === 'SBE' || caiVal === 'GRP') {
+                    status = 'DATANG';
+                } else if (caiVal === 'KOSONG' || caiVal === '' || caiVal === '-') {
+                    status = 'BELUM DIKONFIRMASI';
+                }
 
                 return { nopol, sumber, tglService, tglBoc, mra, status };
             });
@@ -641,7 +645,7 @@
 
             filteredBookingData = filteredGeneral;
 
-            const totalBooking = filteredGeneral.length;
+            const totalBooking = filteredGeneral.filter(d => d.status !== 'BELUM DIKONFIRMASI').length;
             const totalDatang = filteredGeneral.filter(d => d.status === 'DATANG').length;
             const tidakDatang = filteredGeneral.filter(d => d.status === 'TIDAK DATANG').length;
             const belumDatang = filteredGeneral.filter(d => d.status === 'BELUM DATANG').length;
@@ -689,6 +693,7 @@
             const groupMap = {};
 
             filteredBookingData.forEach(item => {
+                if (item.status === 'BELUM DIKONFIRMASI') return;
                 const pDate = parseDate(item.tglService);
                 if (!pDate) return;
 
@@ -711,7 +716,9 @@
                 if (!groupMap[groupKey]) {
                     groupMap[groupKey] = { label: displayLabel, DATANG: 0, 'TIDAK DATANG': 0, 'BELUM DATANG': 0 };
                 }
-                if (groupMap[groupKey][item.status] !== undefined) groupMap[groupKey][item.status]++;
+                if (item.status === 'DATANG') groupMap[groupKey].DATANG++;
+                else if (item.status === 'TIDAK DATANG') groupMap[groupKey]['TIDAK DATANG']++;
+                else if (item.status === 'BELUM DATANG') groupMap[groupKey]['BELUM DATANG']++;
             });
 
             const sortedKeys = Object.keys(groupMap).sort();
@@ -743,7 +750,10 @@
 
         function renderSumberDataChart() {
             const counts = {};
-            filteredBookingData.forEach(item => { counts[item.sumber] = (counts[item.sumber] || 0) + 1; });
+            filteredBookingData.forEach(item => {
+                if (item.status === 'BELUM DIKONFIRMASI') return;
+                counts[item.sumber] = (counts[item.sumber] || 0) + 1;
+            });
             const sortedKeys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0, 7);
             const dataVals = sortedKeys.map(k => counts[k]);
 
@@ -823,12 +833,13 @@
         function renderMraLeaderboard() {
             const mraStats = {};
             filteredBookingData.forEach(item => {
+                if (item.status === 'BELUM DIKONFIRMASI') return;
                 const name = item.mra;
                 if (!mraStats[name]) mraStats[name] = { total: 0, datang: 0, tidak: 0, belum: 0 };
                 mraStats[name].total++;
                 if (item.status === 'DATANG') mraStats[name].datang++;
                 else if (item.status === 'TIDAK DATANG') mraStats[name].tidak++;
-                else mraStats[name].belum++;
+                else if (item.status === 'BELUM DATANG') mraStats[name].belum++;
             });
 
             const sortedMra = Object.keys(mraStats).map(name => {
@@ -869,8 +880,10 @@
         }
 
         function openMraModal(mraName, statusType) {
-            let list = filteredBookingData.filter(d => d.mra === mraName);
-            if (statusType !== 'ALL') list = list.filter(d => d.status === statusType);
+            let list = filteredBookingData.filter(d => d.mra === mraName && d.status !== 'BELUM DIKONFIRMASI');
+            if (statusType !== 'ALL') {
+                list = list.filter(d => d.status === statusType);
+            }
             openBookingModalCustom(`Detail MRA: ${mraName} (${statusType})`, `Menampilkan rincian nopol unit untuk MRA ${mraName}`, list);
         }
 
@@ -924,10 +937,10 @@
                 return;
             }
 
-            let list = filteredBookingData;
-            if (type === 'TOTAL DATANG') list = filteredBookingData.filter(d => d.status === 'DATANG');
-            else if (type === 'TIDAK DATANG') list = filteredBookingData.filter(d => d.status === 'TIDAK DATANG');
-            else if (type === 'BELUM DATANG') list = filteredBookingData.filter(d => d.status === 'BELUM DATANG');
+            let list = filteredBookingData.filter(d => d.status !== 'BELUM DIKONFIRMASI');
+            if (type === 'TOTAL DATANG') list = list.filter(d => d.status === 'DATANG');
+            else if (type === 'TIDAK DATANG') list = list.filter(d => d.status === 'TIDAK DATANG');
+            else if (type === 'BELUM DATANG') list = list.filter(d => d.status === 'BELUM DATANG');
 
             openBookingModalCustom(`Detail KPI: ${type}`, `Menampilkan daftar rincian kendaraan (${type})`, list);
         }
@@ -967,11 +980,12 @@
                 for (let i = 0; i < detailRows.length; i++) {
                     const r = detailRows[i];
                     if (!r || !r[0]) continue;
-                    const code = String(r[0]).trim();
-                    if (!code || code.toLowerCase() === 'code') continue;
+                    
+                    // Gunakan sanitasi .trim().toUpperCase() agar stabil mengatasi spasi / huruf beda
+                    const code = String(r[0]).trim().toUpperCase();
+                    if (!code || code === 'CODE') continue;
                     
                     if (!detailMap[code]) detailMap[code] = [];
-                    // Mapping akurat: Kolom B (Index 1) = No Part, Kolom C (Index 2) = Qty, Kolom D (Index 3) = Nama Part
                     detailMap[code].push({
                         'No Part': String(r[1] || '').trim(),
                         'Qty': String(r[2] || '1').trim(),
@@ -985,10 +999,12 @@
                 for (let i = 1; i < masterRows.length; i++) {
                     const r = masterRows[i];
                     if (!r || !r[0]) continue;
-                    const code = String(r[0]).trim();
-                    if (!code) continue;
+                    
+                    const originalCode = String(r[0]).trim();
+                    const lookupCode = originalCode.toUpperCase();
+                    if (!lookupCode) continue;
 
-                    let items = detailMap[code];
+                    let items = detailMap[lookupCode];
                     if (!items || items.length === 0) {
                         items = [{
                             'No Part': '-',
@@ -997,9 +1013,9 @@
                         }];
                     }
 
-                    if (!map[code]) {
-                        map[code] = {
-                            Code: code,
+                    if (!map[lookupCode]) {
+                        map[lookupCode] = {
+                            Code: originalCode,
                             'Nama SA': String(r[1] || '').trim(),
                             'No Kendaraan': String(r[2] || '').trim(),
                             'Tanggal Order': String(r[3] || '').trim(),
