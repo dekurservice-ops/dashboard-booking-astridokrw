@@ -105,6 +105,68 @@
                 </div>
             </section>
 
+            <!-- BANNER INFORMASI & PANDUAN PENGELOMPOKAN DATA BOOKING ANALYTICS -->
+            <section class="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 text-xs text-amber-950 shadow-sm space-y-3">
+                <div class="flex items-center gap-2 font-bold text-amber-900 text-sm">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i>
+                    <span>Informasi Validasi Data & Pengelompokan Pekerjaan Booking Analytics</span>
+                </div>
+
+                <!-- Poin Validasi Utama -->
+                <div class="bg-white/80 border border-amber-100 p-3 rounded-xl space-y-1.5">
+                    <p class="font-semibold text-amber-900">
+                        📌 Ketentuan Validasi Pembacaan Data:
+                    </p>
+                    <p class="leading-relaxed text-slate-700">
+                        Data akan terbaca jika <code class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold font-mono">Nopol + Order Pekerjaan + Service Tanggal (BOC HO)</code> 
+                        sama dengan <code class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold font-mono">Nopol + Kelompok Pekerjaan + Booking Untuk Tgl (AWAS)</code>.
+                    </p>
+                </div>
+
+                <!-- Highlight Catatan Khusus -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-blue-900">
+                        <span class="font-bold block text-blue-950 mb-0.5">💡 Catatan Booking TMS:</span>
+                        <span>Input teks <strong class="bg-blue-100 px-1 py-0.5 rounded text-blue-900">"TMS"</strong> pada kolom <em>Order Pekerjaan</em> di BOC HO.</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-rose-900">
+                        <span class="font-bold block text-rose-950 mb-0.5">⚠️ Status MRA "Unassigned":</span>
+                        <span>Menandakan data tersebut belum di-input ke dalam sistem BOC HO.</span>
+                    </div>
+                </div>
+
+                <!-- Tabel / Daftar Pengelompokan Pekerjaan -->
+                <div class="pt-2 border-t border-amber-200/60">
+                    <p class="font-bold text-amber-900 mb-2">📋 Referensi Pengelompokan Pekerjaan (BOC HO ➜ AWAS):</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-[11px]">
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok SBE</span>
+                            <span class="text-slate-800 font-medium">Free Jasa (10rb - 60rb), Service Berkala, SBE All Free</span>
+                        </div>
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok SBI</span>
+                            <span class="text-slate-800 font-medium">SBI 1000 KM</span>
+                        </div>
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok TWC</span>
+                            <span class="text-slate-800 font-medium">Waranty Claim</span>
+                        </div>
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok GRP</span>
+                            <span class="text-slate-800 font-medium">Light General Repair, Ganti Oli</span>
+                        </div>
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok RTJ</span>
+                            <span class="text-slate-800 font-medium">Return Job</span>
+                        </div>
+                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
+                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok TMS</span>
+                            <span class="text-slate-800 font-medium">Input "TMS" pada Order Pekerjaan</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- KPI CARDS -->
             <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
                 <div onclick="openBookingModal('BOOKING ON CALL')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
