@@ -23,7 +23,7 @@
         .truncate-part { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col" onclick="handleBodyClick(event)">
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
@@ -112,7 +112,6 @@
                     <span>Informasi Validasi Data & Pengelompokan Pekerjaan Booking Analytics</span>
                 </div>
 
-                <!-- Poin Validasi Utama -->
                 <div class="bg-white/80 border border-amber-100 p-3 rounded-xl space-y-1.5">
                     <p class="font-semibold text-amber-900">
                         📌 Ketentuan Validasi Pembacaan Data:
@@ -123,7 +122,6 @@
                     </p>
                 </div>
 
-                <!-- Highlight Catatan Khusus -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-blue-900">
                         <span class="font-bold block text-blue-950 mb-0.5">💡 Catatan Booking TMS:</span>
@@ -135,7 +133,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel / Daftar Pengelompokan Pekerjaan -->
                 <div class="pt-2 border-t border-amber-200/60">
                     <p class="font-bold text-amber-900 mb-2">📋 Referensi Pengelompokan Pekerjaan (BOC HO ➜ AWAS):</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-[11px]">
@@ -264,7 +261,41 @@
                         <h3 class="font-bold text-slate-800 text-sm">Analisa Booking On Call (BOC) & Performa Kedatangannya</h3>
                         <p class="text-xs text-slate-400">Distribusi jumlah Booking On Call per MRA beserta rincian status kehadirannya</p>
                     </div>
-                    <div class="flex items-center gap-3 text-xs">
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <!-- Multi-Select Dropdown Kelompok Pekerjaan -->
+                        <div class="relative">
+                            <button type="button" onclick="toggleMultiSelectDropdown(event)" class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-medium hover:bg-slate-100 transition-colors focus:outline-none">
+                                <span id="multiSelectLabel">Kelompok: Semua</span>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500"></i>
+                            </button>
+                            <div id="multiSelectDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg p-3 hidden z-30 space-y-2">
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-[11px]">
+                                    <span class="font-bold text-slate-700">Pilih Kategori</span>
+                                    <button type="button" onclick="resetMultiSelect()" class="text-red-600 hover:underline font-semibold">Reset</button>
+                                </div>
+                                <div class="space-y-1.5 max-h-48 overflow-y-auto text-xs font-medium text-slate-700">
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="SBE" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> SBE
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="SBI" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> SBI
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="GRP" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> GRP
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="TWC" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> TWC
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="TMS" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> TMS
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                                        <input type="checkbox" value="RTJ" onchange="onKelompokCheckboxChange()" class="kelompok-cb rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5"> RTJ
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900 inline-block"></span><span class="text-slate-600 font-medium">Total BOC</span></div>
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span><span class="text-slate-600 font-medium">BOC Datang</span></div>
                     </div>
@@ -776,6 +807,38 @@
             });
         });
 
+        function toggleMultiSelectDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('multiSelectDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function handleBodyClick(e) {
+            const dropdown = document.getElementById('multiSelectDropdown');
+            if (dropdown && !dropdown.contains(e.target) && !e.target.closest('button[onclick*="toggleMultiSelectDropdown"]')) {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function onKelompokCheckboxChange() {
+            const checkboxes = document.querySelectorAll('.kelompok-cb:checked');
+            const label = document.getElementById('multiSelectLabel');
+            if (checkboxes.length === 0) {
+                label.textContent = "Kelompok: Semua";
+            } else if (checkboxes.length === 1) {
+                label.textContent = `Kelompok: ${checkboxes[0].value}`;
+            } else {
+                label.textContent = `Kelompok: ${checkboxes.length} Dipilih`;
+            }
+            renderBocPerMraChart();
+        }
+
+        function resetMultiSelect() {
+            document.querySelectorAll('.kelompok-cb').forEach(cb => cb.checked = false);
+            document.getElementById('multiSelectLabel').textContent = "Kelompok: Semua";
+            renderBocPerMraChart();
+        }
+
         function switchView(viewName) {
             const bookingView = document.getElementById('view-booking');
             const sopView = document.getElementById('view-sop');
@@ -950,6 +1013,7 @@
                 const nopol = String(r[1] || '').trim();
                 if (!nopol || nopol === '-') continue;
 
+                const orderPekerjaan = String(r[2] || '').trim();
                 const sumber = String(r[3] || 'Lainnya').trim();
                 const tglBoc = String(r[4] || '').trim();
                 const tglService = String(r[5] || '-').trim();
@@ -966,6 +1030,7 @@
                 result.push({
                     id: i - 1,
                     nopol,
+                    orderPekerjaan,
                     sumber,
                     tglBoc: formatDisplayDate(tglBoc),
                     tglService: formatDisplayDate(tglService),
@@ -1181,6 +1246,10 @@
             const startDateVal = document.getElementById('startDate').value;
             const endDateVal = document.getElementById('endDate').value;
             const selectedMra = document.getElementById('filterMra').value;
+            
+            // Ambil semua kelompok pekerjaan yang dicentang
+            const selectedKelompokList = Array.from(document.querySelectorAll('.kelompok-cb:checked')).map(cb => cb.value.toUpperCase());
+
             const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
             const endLimit = endDateVal ? new Date(endDateVal + 'T23:59:59') : null;
 
@@ -1189,6 +1258,14 @@
 
             rawBookingData.forEach(item => {
                 if (selectedMra !== 'ALL' && item.mra !== selectedMra) return;
+                
+                // Jika ada kelompok yang dipilih, pastikan orderPekerjaan mengandung salah satu dari kelompok terpilih
+                if (selectedKelompokList.length > 0) {
+                    const op = (item.orderPekerjaan || '').toUpperCase();
+                    const matchAny = selectedKelompokList.some(kel => op.includes(kel));
+                    if (!matchAny) return;
+                }
+
                 const bocStr = String(item.tglBoc || '').trim();
                 const isValidBoc = bocStr !== '' && bocStr !== '-' && bocStr.toLowerCase() !== 'undefined' && bocStr.toLowerCase() !== 'null';
                 if (!isValidBoc) return;
@@ -1315,7 +1392,6 @@
             });
         }
 
-        // ================= PENDAPATAN BENGKEL LOGIC =================
         function parseNumericValue(val) {
             if (!val) return 0;
             const strVal = String(val).trim();
@@ -1540,7 +1616,6 @@
             renderRevenueMonthlyComparisonChart();
         }
 
-        // ================= MODAL DETAIL SA PENDAPATAN BENGKEL =================
         function openRevenueSaDetailModal(componentKey, componentLabel) {
             document.getElementById('revenueSaModalTitle').textContent = `Analisa Service Advisor: ${componentLabel}`;
             document.getElementById('revenueSaModalSubtitle').textContent = `Perbandingan Utama vs Pembanding per SA (Diurutkan berdasarkan Growth tertinggi)`;
@@ -1585,18 +1660,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'Nilai Utama',
-                            data: utamaData,
-                            backgroundColor: '#6366f1',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Nilai Pembanding',
-                            data: pembandingData,
-                            backgroundColor: '#cbd5e1',
-                            borderRadius: 4
-                        }
+                        { label: 'Nilai Utama', data: utamaData, backgroundColor: '#6366f1', borderRadius: 4 },
+                        { label: 'Nilai Pembanding', data: pembandingData, backgroundColor: '#cbd5e1', borderRadius: 4 }
                     ]
                 },
                 options: {
@@ -2239,7 +2304,6 @@
 
         function closeBookingModal() { document.getElementById('bookingModal').classList.add('hidden'); }
 
-        // ================= SPECIAL ORDER PART (SOP) LOGIC =================
         function groupSopByCodeMatrix(masterRows, detailRows) {
             const detailMap = {};
             
