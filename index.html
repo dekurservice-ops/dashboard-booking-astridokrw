@@ -21,6 +21,17 @@
         .kpi-card:hover { transform: translateY(-3px); }
         .chart-container { position: relative; height: 260px; width: 100%; }
         .truncate-part { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+        
+        .chart-container-3d {
+            transform: perspective(800px) rotateX(12deg);
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease;
+        }
+        .chart-container-3d:hover {
+            transform: perspective(800px) rotateX(4deg) translateY(-4px);
+            filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.22));
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col" onclick="handleBodyClick(event)">
@@ -105,7 +116,6 @@
                 </div>
             </section>
 
-            <!-- BANNER INFORMASI & PANDUAN PENGELOMPOKAN DATA BOOKING ANALYTICS -->
             <section class="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 text-xs text-amber-950 shadow-sm space-y-3">
                 <div class="flex items-center gap-2 font-bold text-amber-900 text-sm">
                     <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i>
@@ -121,50 +131,8 @@
                         sama dengan <code class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold font-mono">Nopol + Kelompok Pekerjaan + Booking Untuk Tgl (AWAS)</code>.
                     </p>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-blue-900">
-                        <span class="font-bold block text-blue-950 mb-0.5">💡 Catatan Booking TMS:</span>
-                        <span>Input teks <strong class="bg-blue-100 px-1 py-0.5 rounded text-blue-900">"TMS"</strong> pada kolom <em>Order Pekerjaan</em> di BOC HO.</span>
-                    </div>
-                    <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-rose-900">
-                        <span class="font-bold block text-rose-950 mb-0.5">⚠️ Status "Booking Langsung":</span>
-                        <span>Menandakan data tersebut belum di-input atau tidak ada di-Report BOC HO.</span>
-                    </div>
-                </div>
-
-                <div class="pt-2 border-t border-amber-200/60">
-                    <p class="font-bold text-amber-900 mb-2">📋 Referensi Pengelompokan Pekerjaan (BOC HO ➜ AWAS):</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-[11px]">
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok SBE</span>
-                            <span class="text-slate-800 font-medium">Free Jasa (10rb - 60rb), Service Berkala, SBE All Free</span>
-                        </div>
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok SBI</span>
-                            <span class="text-slate-800 font-medium">SBI 1000 KM</span>
-                        </div>
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok TWC</span>
-                            <span class="text-slate-800 font-medium">Waranty Claim</span>
-                        </div>
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok GRP</span>
-                            <span class="text-slate-800 font-medium">Light General Repair, Ganti Oli</span>
-                        </div>
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok RTJ</span>
-                            <span class="text-slate-800 font-medium">Return Job</span>
-                        </div>
-                        <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500 block text-[9px] uppercase">Kelompok TMS</span>
-                            <span class="text-slate-800 font-medium">Input "TMS" pada Order Pekerjaan</span>
-                        </div>
-                    </div>
-                </div>
             </section>
 
-            <!-- KPI CARDS -->
             <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
                 <div onclick="openBookingModal('BOOKING ON CALL')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between text-purple-600">
@@ -254,7 +222,6 @@
                 </div>
             </section>
 
-            <!-- ANALISA BOC -->
             <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
                     <div>
@@ -262,7 +229,6 @@
                         <p class="text-xs text-slate-400">Distribusi jumlah Booking On Call per MRA beserta rincian status kehadirannya</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3 text-xs">
-                        <!-- Multi-Select Dropdown Kelompok Pekerjaan -->
                         <div class="relative">
                             <button type="button" onclick="toggleMultiSelectDropdown(event)" class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-medium hover:bg-slate-100 transition-colors focus:outline-none">
                                 <span id="multiSelectLabel">Kelompok: Semua</span>
@@ -305,7 +271,6 @@
                 </div>
             </section>
 
-            <!-- LEADERBOARD MRA -->
             <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                     <div>
@@ -365,15 +330,15 @@
                         <span class="text-[10px] font-bold uppercase tracking-wider">Ready Pasang</span>
                         <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i></div>
                     </div>
-                    <h3 id="sop-kpi-pasang" class="text-2xl font-bold mt-2">0</h3>
+                    <h3 id="sop-kpi-pasang" class="text-2xl font-bold mt-2 text-blue-600">0</h3>
                 </div>
 
                 <div onclick="openSopKPIModal('Konfirmasi Jadwal', 'Order Tunggu Konfirmasi')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between text-amber-600">
+                    <div class="flex items-center justify-between text-amber-700">
                         <span class="text-[10px] font-bold uppercase tracking-wider">Konfirmasi</span>
-                        <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="help-circle" class="w-4 h-4"></i></div>
+                        <div class="p-1.5 bg-amber-100 text-amber-700 rounded-lg"><i data-lucide="help-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <h3 id="sop-kpi-konfirmasi" class="text-2xl font-bold mt-2">0</h3>
+                    <h3 id="sop-kpi-konfirmasi" class="text-2xl font-bold mt-2 text-amber-700">0</h3>
                 </div>
 
                 <div onclick="openSopKPIModal('Terpasang', 'Order Part Terpasang')" class="kpi-card bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
@@ -417,43 +382,43 @@
 
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2 flex flex-col">
-                    <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 mb-4 uppercase">
-                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600"></i> Top 10 Nomor Part Terorder
+                    <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 mb-1 uppercase">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600"></i> Special Order Parts dengan Frekuensi Tinggi ( Potensi Phase-In )
                     </h3>
+                    <p class="text-[11px] text-slate-400 font-medium italic mb-4">Klik salah satu batang grafik di bawah untuk melihat rincian Code Order, Nopol, dan Nama SA.</p>
                     <div class="chart-container flex-1"><canvas id="sopTopPartChart"></canvas></div>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
                     <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 mb-1 uppercase">
-                        <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i> Analisa Suplai Ratio
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i> Analisa Suplai Ratio (3D View)
                     </h3>
                     <div class="grid grid-cols-2 gap-2 my-4 bg-slate-50 p-3 rounded-xl border border-slate-100 text-[10px]">
                         <div><span class="text-slate-400 font-bold block uppercase">Total Order:</span> <span id="sop-stat-total" class="font-bold text-slate-900 text-sm">0</span></div>
                         <div><span class="text-slate-400 font-bold block uppercase">Part Tiba:</span> <span id="sop-stat-suplai" class="font-bold text-emerald-600 text-sm">0</span></div>
-                        <div><span class="text-slate-400 font-bold block uppercase">Total BO:</span> <span id="sop-stat-total-bo" class="font-bold text-red-600 text-sm">0</span></div>
-                        <div><span class="text-slate-400 font-bold block uppercase">BO Tiba:</span> <span id="sop-stat-bo-suplai" class="font-bold text-indigo-600 text-sm">0</span></div>
+                        <div><span class="text-slate-400 font-bold block uppercase">BO Pending:</span> <span id="sop-stat-total-bo" class="font-bold text-red-600 text-sm">0</span></div>
+                        <div><span class="text-slate-400 font-bold block uppercase">On Order:</span> <span id="sop-stat-on-order" class="font-bold text-purple-600 text-sm">0</span></div>
                     </div>
-                    <div class="chart-container flex-1" style="max-height: 160px;"><canvas id="sopSupplyRatioChart"></canvas></div>
+                    <div class="chart-container flex-1 chart-container-3d flex items-center justify-center" style="max-height: 220px;"><canvas id="sopSupplyRatioChart"></canvas></div>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 lg:col-span-3 flex flex-col">
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
                         <div>
                             <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 uppercase">
-                                <i data-lucide="timer" class="w-4 h-4 text-indigo-600"></i> Lead Time Suplai (> 3 Hari)
+                                <i data-lucide="timer" class="w-4 h-4 text-indigo-600"></i> Lead Time Suplai (> 3 Hari / $\ge$ 4 Hari)
                             </h3>
-                            <p class="text-[11px] text-slate-400 font-medium italic">Menampilkan Nomor Order (Code) dengan durasi suplai di atas 3 hari.</p>
+                            <p class="text-[11px] text-slate-400 font-medium italic">Klik salah satu batang grafik di bawah untuk melihat rincian Nopol, Tgl Order, Aktual Datang, & Spare Part.</p>
                         </div>
                         <div class="flex gap-3 text-center">
-                            <div class="bg-slate-50 border px-3 py-1 rounded-xl"><span class="text-[9px] font-bold text-slate-400 uppercase block">Rata-rata</span><span id="sop-avg-lt" class="text-sm font-bold text-indigo-600">0d</span></div>
+                            <div class="bg-slate-50 border px-3 py-1 rounded-xl"><span class="text-[9px] font-bold text-slate-400 uppercase block">Rata-rata (>3d)</span><span id="sop-avg-lt" class="text-sm font-bold text-indigo-600">0d</span></div>
                             <div class="bg-red-50 border border-red-100 px-3 py-1 rounded-xl"><span class="text-[9px] font-bold text-red-400 uppercase block">Terlama</span><span id="sop-max-lt" class="text-sm font-bold text-red-600">0d</span></div>
                         </div>
                     </div>
-                    <div class="chart-container flex-1" style="max-height: 240px;"><canvas id="sopLeadTimeChart"></canvas></div>
+                    <div class="chart-container flex-1" style="max-height: 260px;"><canvas id="sopLeadTimeChart"></canvas></div>
                 </div>
             </section>
 
-            <!-- MAIN BOARD DATA SOP -->
             <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div>
@@ -470,6 +435,7 @@
                                 <th class="px-4 py-4 bg-slate-100">SA</th>
                                 <th class="px-4 py-4 bg-slate-100">No Kendaraan</th>
                                 <th class="px-4 py-4 bg-slate-100">Tgl Order</th>
+                                <th class="px-4 py-4 bg-slate-100">Tgl Pasang</th>
                                 <th class="px-4 py-4 bg-slate-100">Status</th>
                                 <th class="px-4 py-4 text-center bg-slate-100">Aksi</th>
                             </tr>
@@ -514,12 +480,8 @@
                 </div>
             </section>
 
-            <!-- MAIN CONTAINER: KPI CARDS DI KIRI (VERTIKAL) & CHART/TABEL DI KANAN -->
             <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                
-                <!-- KOLOM KIRI: KPI CARDS TERSUSUN VERTIKAL -->
                 <div class="lg:col-span-1 flex flex-col gap-4">
-                    <!-- Highlight Utama (DPP) -->
                     <div onclick="openRevenueSaDetailModal('dpp', 'Highlight DPP')" class="kpi-card bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-lg border border-slate-700 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-emerald-400 mb-2">
@@ -537,7 +499,6 @@
                         </div>
                     </div>
 
-                    <!-- Jasa Umum Card -->
                     <div onclick="openRevenueSaDetailModal('jasaUmum', 'Jasa Umum')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-purple-600 mb-1">
@@ -555,7 +516,6 @@
                         </div>
                     </div>
 
-                    <!-- Part Card -->
                     <div onclick="openRevenueSaDetailModal('part', 'Part')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-indigo-600 mb-1">
@@ -573,7 +533,6 @@
                         </div>
                     </div>
 
-                    <!-- Oli Card -->
                     <div onclick="openRevenueSaDetailModal('oli', 'Oli')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-emerald-600 mb-1">
@@ -591,7 +550,6 @@
                         </div>
                     </div>
 
-                    <!-- Bahan Card -->
                     <div onclick="openRevenueSaDetailModal('bahan', 'Bahan')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-blue-600 mb-1">
@@ -609,7 +567,6 @@
                         </div>
                     </div>
 
-                    <!-- Sublet Card -->
                     <div onclick="openRevenueSaDetailModal('sublet', 'Sublet')" class="kpi-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-amber-600 mb-1">
@@ -628,7 +585,6 @@
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: GRAFIK & CHARTS -->
                 <div class="lg:col-span-3 space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
@@ -674,7 +630,6 @@
                         </div>
                     </div>
 
-                    <!-- CHART KOMBINASI (SIDE-BY-SIDE BAR + LINE) -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
                             <div>
@@ -719,7 +674,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETAIL SA PENDAPATAN BENGKEL -->
     <div id="revenueSaDetailModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
             <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
@@ -749,6 +703,86 @@
             </div>
             <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
                 <button onclick="closeRevenueSaDetailModal()" class="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl text-xs hover:bg-slate-900 transition-colors">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sopTopPartClickModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <div>
+                    <h3 id="sopTopModalTitle" class="text-base font-bold text-slate-900 uppercase">Detail Frekuensi Part (Potensi Phase-In)</h3>
+                    <p class="text-xs text-slate-500">Daftar order yang menggunakan suku cadang ini</p>
+                </div>
+                <button onclick="closeSopTopPartModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="rounded-xl border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[9px] border-b border-slate-200 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3">Code Order</th>
+                                <th class="px-4 py-3">No Kendaraan</th>
+                                <th class="px-4 py-3">Nama SA</th>
+                                <th class="px-4 py-3">Nama Part / Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sopTopModalTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+                <button onclick="closeSopTopPartModal()" class="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl text-xs hover:bg-slate-900 transition-colors">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sopLtClickModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <div>
+                    <h3 id="sopLtModalTitle" class="text-base font-bold text-slate-900 uppercase">Detail Lead Time Suplai Part</h3>
+                    <p class="text-xs text-slate-500">Rincian pesanan suku cadang berdasarkan baris grafik yang dipilih</p>
+                </div>
+                <button onclick="closeSopLtClickModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">No Kendaraan</span>
+                        <span id="sopLtModalNopol" class="font-bold text-indigo-600 text-sm">-</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Tgl Order</span>
+                        <span id="sopLtModalTglOrder" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Aktual Datang</span>
+                        <span id="sopLtModalAktual" class="font-semibold text-emerald-600">-</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Lead Time</span>
+                        <span id="sopLtModalDuration" class="font-bold text-red-600 text-sm">-</span>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-2">Daftar Suku Cadang (Spare Part):</h4>
+                    <div class="rounded-xl border border-slate-200 overflow-hidden">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[9px] border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2.5">No Part</th>
+                                    <th class="px-3 py-2.5">Nama Part</th>
+                                    <th class="px-3 py-2.5 text-center">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sopLtModalPartsTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+                <button onclick="closeSopLtClickModal()" class="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl text-xs hover:bg-slate-900 transition-colors">Tutup</button>
             </div>
         </div>
     </div>
@@ -794,6 +828,8 @@
         let rawSopMasterData = [], rawDetailPartData = [], groupedSopData = [], filteredSopData = [], sopCharts = {};
         let rawRevenueData = [], filteredRevenueData = [], filteredCompRevenueData = [];
         let revenueTrendChartInstance = null, revenueCompositionChartInstance = null, revenueSaChartInstance = null, revenueMonthlyComparisonChartInstance = null, revenueSaHorizontalChartInstance = null;
+        let sopLtChartDataStore = []; 
+        let sopTopPartDetailsMap = {}; 
 
         Chart.register(ChartDataLabels);
 
@@ -804,6 +840,7 @@
             ['sop-search', 'sop-filter-sa', 'sop-filter-status', 'sop-filter-start', 'sop-filter-end'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.addEventListener('input', applySopFilters);
+                if(el && el.tagName === 'SELECT') el.addEventListener('change', applySopFilters);
             });
         });
 
@@ -1247,7 +1284,6 @@
             const endDateVal = document.getElementById('endDate').value;
             const selectedMra = document.getElementById('filterMra').value;
             
-            // Ambil semua kelompok pekerjaan yang dicentang
             const selectedKelompokList = Array.from(document.querySelectorAll('.kelompok-cb:checked')).map(cb => cb.value.toUpperCase());
 
             const startLimit = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
@@ -1259,7 +1295,6 @@
             rawBookingData.forEach(item => {
                 if (selectedMra !== 'ALL' && item.mra !== selectedMra) return;
                 
-                // Jika ada kelompok yang dipilih, pastikan orderPekerjaan mengandung salah satu dari kelompok terpilih
                 if (selectedKelompokList.length > 0) {
                     const op = (item.orderPekerjaan || '').toUpperCase();
                     const matchAny = selectedKelompokList.some(kel => op.includes(kel));
@@ -1708,7 +1743,7 @@
             } else {
                 saList.forEach(row => {
                     const growthStr = (row.growth >= 0 ? "+" : "") + row.growth.toFixed(1) + "%";
-                    const badgeClass = row.growth >= 0 ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-rose-50 text-rose-600 border-rose-200";
+                    const badgeClass = row.growth >= 0 ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-rose-50 text-rose-600 border-emerald-200";
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 transition-colors";
@@ -2396,13 +2431,9 @@
                 
                 let matchesStatus = true;
                 if (status) {
-                    const itemStatus = i['Status Part'].toUpperCase();
-                    const filterStatusUpper = status.toUpperCase();
-                    if (filterStatusUpper.includes('TUNGGU PASANG')) {
-                        matchesStatus = itemStatus.includes('TUNGGU') || itemStatus.includes('PASANG');
-                    } else {
-                        matchesStatus = itemStatus.includes(filterStatusUpper);
-                    }
+                    const itemStatus = i['Status Part'].trim().toUpperCase();
+                    const filterStatusUpper = status.trim().toUpperCase();
+                    matchesStatus = (itemStatus === filterStatusUpper);
                 }
                 
                 let matchesDate = true;
@@ -2435,24 +2466,40 @@
         }
 
         function renderSopKPIs() {
-            const getLen = (st) => {
-                const upperSt = st.toUpperCase();
-                return filteredSopData.filter(i => {
-                    const itemStatus = i['Status Part'].trim().toUpperCase();
-                    if (upperSt === 'TUNGGU PASANG') {
-                        return itemStatus === 'TUNGGU PASANG';
+            const start = document.getElementById('sop-filter-start')?.value || '';
+            const end = document.getElementById('sop-filter-end')?.value || '';
+
+            const dateFilteredData = groupedSopData.filter(i => {
+                if (!start && !end) return true;
+                const d = parseUniversalDate(i['Tanggal Order']);
+                if (d) {
+                    if (start && d < new Date(start)) return false;
+                    if (end) {
+                        const ed = new Date(end);
+                        ed.setHours(23,59,59);
+                        if (d > ed) return false;
                     }
-                    return itemStatus.includes(upperSt);
+                } else {
+                    return false;
+                }
+                return true;
+            });
+
+            const getLenByStatus = (st) => {
+                const upperSt = st.trim().toUpperCase();
+                return dateFilteredData.filter(i => {
+                    const itemStatus = i['Status Part'].trim().toUpperCase();
+                    return itemStatus === upperSt;
                 }).length;
             };
 
             const counts = { 
-                total: filteredSopData.length, 
-                sedang: getLen('SEDANG ORDER'),
-                bo: getLen('B/O'), 
-                pasang: getLen('TUNGGU PASANG'), 
-                konf: getLen('Konfirmasi Jadwal'), 
-                terpasang: getLen('Terpasang') 
+                total: dateFilteredData.length, 
+                sedang: getLenByStatus('SEDANG ORDER'),
+                bo: getLenByStatus('B/O'), 
+                pasang: getLenByStatus('TUNGGU PASANG'), 
+                konf: getLenByStatus('Konfirmasi Jadwal'), 
+                terpasang: getLenByStatus('Terpasang') 
             };
             
             if(document.getElementById('sop-kpi-total')) document.getElementById('sop-kpi-total').innerText = counts.total;
@@ -2465,13 +2512,13 @@
 
         function getSopStatusColor(st) {
             if(!st) return 'bg-slate-100 text-slate-500 border-slate-200';
-            const statusUpper = st.toUpperCase();
-            if (statusUpper.includes('SEDANG ORDER')) return 'bg-purple-50 text-purple-600 border-purple-200';
-            if (statusUpper.includes('B/O')) return 'bg-red-50 text-red-600 border-red-200';
-            if (statusUpper.includes('KONFIRMASI JADWAL')) return 'bg-amber-50 text-amber-600 border-amber-200';
-            if (statusUpper.includes('TUNGGU') || statusUpper.includes('PASANG')) return 'bg-blue-50 text-blue-600 border-blue-200';
-            if (statusUpper.includes('TERPASANG')) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
-            return 'bg-slate-100 text-slate-500 border-slate-200';
+            const statusUpper = st.trim().toUpperCase();
+            if (statusUpper.includes('TERPASANG')) return 'bg-emerald-50 text-emerald-700 border-emerald-300 font-bold';
+            if (statusUpper.includes('TUNGGU PASANG')) return 'bg-sky-50 text-sky-700 border-sky-300 font-bold';
+            if (statusUpper.includes('KONFIRMASI JADWAL')) return 'bg-orange-50 text-orange-700 border-orange-300 font-bold';
+            if (statusUpper.includes('B/O')) return 'bg-red-50 text-red-700 border-red-300 font-bold';
+            if (statusUpper.includes('SEDANG ORDER')) return 'bg-purple-50 text-purple-700 border-purple-300 font-bold';
+            return 'bg-slate-100 text-slate-600 border-slate-200';
         }
 
         function renderSopTable() {
@@ -2485,6 +2532,7 @@
                         <td class="px-4 py-4 font-bold text-slate-800">${i['Nama SA'] || '-'}</td>
                         <td class="px-4 py-4 font-bold text-indigo-600">${i['No Kendaraan'] || '-'}</td>
                         <td class="px-4 py-4 text-slate-500 font-medium">${i['Tanggal Order'] || '-'}</td>
+                        <td class="px-4 py-4 text-slate-600 font-medium">${i['Tanggal Pasang'] || '-'}</td>
                         <td class="px-4 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${getSopStatusColor(i['Status Part'])}">${i['Status Part'] || '-'}</span></td>
                         <td class="px-4 py-4 text-center text-slate-400 hover:text-indigo-600"><i data-lucide="eye" class="w-4 h-4 mx-auto"></i></td>
                     </tr>`;
@@ -2496,11 +2544,26 @@
             Object.values(sopCharts).forEach(c => c.destroy());
             
             const partMap = {};
+            sopTopPartDetailsMap = {};
+
             filteredSopData.forEach(i => { 
+                const uniquePartsInOrder = new Set();
                 i.items.forEach(it => {
                     const p = (it['No Part'] || '').trim(); 
-                    const q = parseInt(it['Qty']) || 1;
-                    if(p && p !== '-') partMap[p] = (partMap[p] || 0) + q; 
+                    if(p && p !== '-') {
+                        uniquePartsInOrder.add(p);
+                        if(!sopTopPartDetailsMap[p]) sopTopPartDetailsMap[p] = [];
+                        sopTopPartDetailsMap[p].push({
+                            code: i['Code'] || '-',
+                            nopol: i['No Kendaraan'] || '-',
+                            sa: i['Nama SA'] || '-',
+                            partName: it['Nama Part'] || '-',
+                            qty: it['Qty'] || '1'
+                        });
+                    }
+                });
+                uniquePartsInOrder.forEach(p => {
+                    partMap[p] = (partMap[p] || 0) + 1;
                 });
             });
             const top = Object.entries(partMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -2510,54 +2573,112 @@
                 sopCharts.top = new Chart(ctxTop.getContext('2d'), {
                     type: 'bar',
                     data: { labels: top.map(x=>x[0]), datasets: [{ data: top.map(x=>x[1]), backgroundColor: '#6366f1', borderRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        onClick: function(event, elements) {
+                            if (elements && elements.length > 0) {
+                                const index = elements[0].index;
+                                const clickedPartNo = top[index][0];
+                                const records = sopTopPartDetailsMap[clickedPartNo] || [];
+                                openSopTopPartModal(clickedPartNo, records);
+                            }
+                        },
+                        plugins: { legend: { display: false }, datalabels: { display: false } } 
+                    }
                 });
             }
 
-            let tiba = 0, boTot = 0, boTiba = 0, boPend = 0;
+            let partTiba = 0, boPendingCount = 0, boTibaCount = 0, onOrderCount = 0;
             filteredSopData.forEach(i => {
                 const etaVal = String(i['ETA B/O'] || '').trim();
                 const actVal = String(i['Aktual Kedatangan'] || '').trim();
-                const statusVal = String(i['Status Part'] || '').toUpperCase();
+                const statusVal = String(i['Status Part'] || '').trim().toUpperCase();
 
-                const isTiba = actVal !== '' && actVal !== '-' || statusVal.includes('TERPASANG') || statusVal.includes('TUNGGU') || statusVal.includes('PASANG');
-                const isBo = etaVal !== '' && etaVal !== '-' || statusVal.includes('B/O');
+                const isTiba = (actVal !== '' && actVal !== '-') || statusVal.includes('TERPASANG') || statusVal.includes('TUNGGU') || statusVal.includes('PASANG');
+                const isBo = (etaVal !== '' && etaVal !== '-') || statusVal.includes('B/O');
+                const isOnOrder = statusVal === 'SEDANG ORDER';
 
-                if (isTiba) tiba++;
+                if (isTiba) partTiba++;
                 if (isBo) {
-                    boTot++;
                     if (isTiba) {
-                        boTiba++;
+                        boTibaCount++;
                     } else {
-                        boPend++;
+                        boPendingCount++; 
                     }
                 }
+                if (isOnOrder) onOrderCount++;
             });
             
             if(document.getElementById('sop-stat-total')) document.getElementById('sop-stat-total').innerText = filteredSopData.length;
-            if(document.getElementById('sop-stat-suplai')) document.getElementById('sop-stat-suplai').innerText = tiba;
-            if(document.getElementById('sop-stat-total-bo')) document.getElementById('sop-stat-total-bo').innerText = boTot;
-            if(document.getElementById('sop-stat-bo-suplai')) document.getElementById('sop-stat-bo-suplai').innerText = boTiba;
+            if(document.getElementById('sop-stat-suplai')) document.getElementById('sop-stat-suplai').innerText = partTiba;
+            if(document.getElementById('sop-stat-total-bo')) document.getElementById('sop-stat-total-bo').innerText = boPendingCount;
+            if(document.getElementById('sop-stat-on-order')) document.getElementById('sop-stat-on-order').innerText = onOrderCount;
 
             const ctxRatio = document.getElementById('sopSupplyRatioChart');
             if(ctxRatio) {
                 sopCharts.ratio = new Chart(ctxRatio.getContext('2d'), {
                     type: 'doughnut',
-                    data: { labels: ['BO Tiba', 'BO Pending', 'Direct'], datasets: [{ data: [boTiba, boPend, Math.max(0, tiba-boTiba)], backgroundColor: ['#6366f1', '#ef4444', '#10b981'], borderWeight: 0 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } }, datalabels: { display: false } } }
+                    data: { 
+                        labels: ['On Order', 'Part Tiba', 'BO Pending', 'BO Tiba'], 
+                        datasets: [{ 
+                            data: [onOrderCount, partTiba, boPendingCount, boTibaCount], 
+                            backgroundColor: ['#a855f7', '#10b981', '#ef4444', '#6366f1'], 
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 6
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        cutout: '65%', 
+                        plugins: { 
+                            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                            datalabels: {
+                                color: '#ffffff',
+                                font: { weight: 'bold', size: 11 },
+                                formatter: (value) => value > 0 ? value : ''
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let value = context.parsed;
+                                        return ` ${context.label}: ${value}`;
+                                    }
+                                }
+                            }
+                        } 
+                    }
                 });
             }
 
-            let ltTot=0, ltCnt=0, ltMax=0; const ltD=[], ltL=[];
+            let ltTot=0, ltCnt=0, ltMax=0; 
+            const ltD=[], ltL=[];
+            sopLtChartDataStore = [];
+
             filteredSopData.forEach(i => {
                 const o = parseUniversalDate(i['Tanggal Order']), a = parseUniversalDate(i['Aktual Kedatangan']);
                 if(o && a) {
                     const diffTime = a - o;
                     if (diffTime >= 0) {
                         const d = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        ltTot += d; ltCnt++; 
-                        if(d > ltMax) ltMax = d;
-                        ltD.push(d); ltL.push(i['Code'] || 'N/A');
+                        if (d >= 4) {
+                            ltTot += d; 
+                            ltCnt++; 
+                            if(d > ltMax) ltMax = d;
+                            ltD.push(d); 
+                            ltL.push(i['Code'] || 'N/A');
+
+                            sopLtChartDataStore.push({
+                                code: i['Code'] || '-',
+                                nopol: i['No Kendaraan'] || '-',
+                                tglOrder: i['Tanggal Order'] || '-',
+                                aktual: i['Aktual Kedatangan'] || '-',
+                                duration: d + ' Hari',
+                                items: i.items || []
+                            });
+                        }
                     }
                 }
             });
@@ -2569,10 +2690,108 @@
             if(ctxLt) {
                 sopCharts.lt = new Chart(ctxLt.getContext('2d'), {
                     type: 'bar',
-                    data: { labels: ltL.slice(0,15), datasets: [{ data: ltD.slice(0,15), backgroundColor: '#ef4444', borderRadius: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+                    data: { 
+                        labels: ltL.slice(0, 15), 
+                        datasets: [{ 
+                            label: 'Durasi Lead Time (Hari)', 
+                            data: ltD.slice(0, 15), 
+                            backgroundColor: '#ef4444', 
+                            borderRadius: 6 
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        onClick: function(event, elements) {
+                            if (elements && elements.length > 0) {
+                                const index = elements[0].index;
+                                const dataRecord = sopLtChartDataStore[index];
+                                if (dataRecord) {
+                                    openSopLtClickModal(dataRecord);
+                                }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false }, 
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                color: '#b91c1c',
+                                font: { weight: 'bold', size: 10 },
+                                formatter: (value) => `${value} Hari`
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { precision: 0 },
+                                title: { display: true, text: 'Jumlah Hari' }
+                            }
+                        }
+                    }
                 });
             }
+        }
+
+        function openSopTopPartModal(partNo, records) {
+            document.getElementById('sopTopModalTitle').innerText = `Detail Frekuensi Part: ${partNo}`;
+            const tbody = document.getElementById('sopTopModalTableBody');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">Tidak ada data order ditemukan</td></tr>`;
+            } else {
+                records.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 font-mono font-bold text-indigo-600">${r.code}</td>
+                        <td class="px-4 py-3 font-bold text-slate-800">${r.nopol}</td>
+                        <td class="px-4 py-3 text-slate-700">${r.sa}</td>
+                        <td class="px-4 py-3 text-slate-600">${r.partName} (<strong class="text-indigo-600">Qty: ${r.qty}</strong>)</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('sopTopPartClickModal').classList.remove('hidden');
+        }
+
+        function closeSopTopPartModal() {
+            document.getElementById('sopTopPartClickModal').classList.add('hidden');
+        }
+
+        function openSopLtClickModal(record) {
+            document.getElementById('sopLtModalTitle').innerText = `Detail Lead Time: Code [${record.code}]`;
+            document.getElementById('sopLtModalNopol').innerText = record.nopol;
+            document.getElementById('sopLtModalTglOrder').innerText = record.tglOrder;
+            document.getElementById('sopLtModalAktual').innerText = record.aktual;
+            document.getElementById('sopLtModalDuration').innerText = record.duration;
+
+            const tbody = document.getElementById('sopLtModalPartsTableBody');
+            tbody.innerHTML = '';
+
+            if (!record.items || record.items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-400">Tidak ada rincian spare part</td></tr>`;
+            } else {
+                record.items.forEach(it => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-3 py-2.5 font-mono font-bold text-indigo-600">${it['No Part'] || '-'}</td>
+                        <td class="px-3 py-2.5 text-slate-800 font-medium">${it['Nama Part'] || '-'}</td>
+                        <td class="px-3 py-2.5 text-center font-bold text-slate-700">${it['Qty'] || '1'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('sopLtClickModal').classList.remove('hidden');
+        }
+
+        function closeSopLtClickModal() {
+            document.getElementById('sopLtClickModal').classList.add('hidden');
         }
 
         function showSopDetail(idx) {
@@ -2617,14 +2836,30 @@
         function closeSopDetailModal() { document.getElementById('sopDetailModal').classList.add('hidden'); }
 
         function openSopKPIModal(st, title) {
-            const upperSt = st.toUpperCase();
-            const targetList = st ? filteredSopData.filter(i => {
-                const itemStatus = i['Status Part'].trim().toUpperCase();
-                if (upperSt === 'TUNGGU PASANG') {
-                    return itemStatus === 'TUNGGU PASANG';
+            const start = document.getElementById('sop-filter-start')?.value || '';
+            const end = document.getElementById('sop-filter-end')?.value || '';
+
+            const dateFilteredData = groupedSopData.filter(i => {
+                if (!start && !end) return true;
+                const d = parseUniversalDate(i['Tanggal Order']);
+                if (d) {
+                    if (start && d < new Date(start)) return false;
+                    if (end) {
+                        const ed = new Date(end);
+                        ed.setHours(23,59,59);
+                        if (d > ed) return false;
+                    }
+                } else {
+                    return false;
                 }
-                return itemStatus.includes(upperSt);
-            }) : filteredSopData;
+                return true;
+            });
+
+            const upperSt = st.trim().toUpperCase();
+            const targetList = st ? dateFilteredData.filter(i => {
+                const itemStatus = i['Status Part'].trim().toUpperCase();
+                return itemStatus === upperSt;
+            }) : dateFilteredData;
 
             document.getElementById('sopKpiModalTitle').innerText = title;
             document.getElementById('sopKpiModalTableBody').innerHTML = targetList.map(i => {
